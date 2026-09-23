@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\KampConnect.Messaging.Data.Interface\KampConnect.Messaging.Data.Interface.csproj" />
+    <ProjectReference Include="..\KampConnect.Messaging.Data.Context\KampConnect.Messaging.Data.Context.csproj" />
+    <ProjectReference Include="..\KampConnect.Messaging.Data.Entity\KampConnect.Messaging.Data.Entity.csproj" />
+  </ItemGroup>
+</Project>

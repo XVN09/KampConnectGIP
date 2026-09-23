@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\KampConnect.Media.Data.Entity\KampConnect.Media.Data.Entity.csproj" />
+  </ItemGroup>
+</Project>

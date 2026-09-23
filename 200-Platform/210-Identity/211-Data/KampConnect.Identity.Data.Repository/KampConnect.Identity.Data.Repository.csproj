@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\KampConnect.Identity.Data.Interface\KampConnect.Identity.Data.Interface.csproj" />
+    <ProjectReference Include="..\KampConnect.Identity.Data.Context\KampConnect.Identity.Data.Context.csproj" />
+    <ProjectReference Include="..\KampConnect.Identity.Data.Entity\KampConnect.Identity.Data.Entity.csproj" />
+  </ItemGroup>
+</Project>

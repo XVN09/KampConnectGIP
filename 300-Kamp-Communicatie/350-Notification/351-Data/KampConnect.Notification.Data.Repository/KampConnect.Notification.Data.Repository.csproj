@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\KampConnect.Notification.Data.Interface\KampConnect.Notification.Data.Interface.csproj" />
+    <ProjectReference Include="..\KampConnect.Notification.Data.Context\KampConnect.Notification.Data.Context.csproj" />
+    <ProjectReference Include="..\KampConnect.Notification.Data.Entity\KampConnect.Notification.Data.Entity.csproj" />
+  </ItemGroup>
+</Project>

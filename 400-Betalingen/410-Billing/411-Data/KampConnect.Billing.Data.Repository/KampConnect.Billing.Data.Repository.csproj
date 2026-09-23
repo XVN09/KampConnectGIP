@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\KampConnect.Billing.Data.Interface\KampConnect.Billing.Data.Interface.csproj" />
+    <ProjectReference Include="..\KampConnect.Billing.Data.Context\KampConnect.Billing.Data.Context.csproj" />
+    <ProjectReference Include="..\KampConnect.Billing.Data.Entity\KampConnect.Billing.Data.Entity.csproj" />
+  </ItemGroup>
+</Project>

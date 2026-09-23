@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\..\322-Business\KampConnect.Messaging.Business.Logic\KampConnect.Messaging.Business.Logic.csproj" />
+    <ProjectReference Include="..\..\322-Business\KampConnect.Messaging.Business.Contracts\KampConnect.Messaging.Business.Contracts.csproj" />
+    <ProjectReference Include="..\..\321-Data\KampConnect.Messaging.Data.Repository\KampConnect.Messaging.Data.Repository.csproj" />
+    <ProjectReference Include="..\..\321-Data\KampConnect.Messaging.Data.Context\KampConnect.Messaging.Data.Context.csproj" />
+    <ProjectReference Include="..\..\..\..\000-Shared\KampConnect.Shared.ServiceDefaults\KampConnect.Shared.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\..\..\000-Shared\KampConnect.Shared.Contracts\KampConnect.Shared.Contracts.csproj" />
+  </ItemGroup>
+</Project>

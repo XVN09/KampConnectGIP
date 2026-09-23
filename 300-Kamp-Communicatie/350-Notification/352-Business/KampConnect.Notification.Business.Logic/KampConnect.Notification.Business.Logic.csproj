@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\KampConnect.Notification.Business.Contracts\KampConnect.Notification.Business.Contracts.csproj" />
+    <ProjectReference Include="..\..\351-Data\KampConnect.Notification.Data.Interface\KampConnect.Notification.Data.Interface.csproj" />
+    <ProjectReference Include="..\..\351-Data\KampConnect.Notification.Data.Entity\KampConnect.Notification.Data.Entity.csproj" />
+    <ProjectReference Include="..\..\..\..\000-Shared\KampConnect.Shared.Contracts\KampConnect.Shared.Contracts.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,12 @@
+<Project>
+  <!--
+    Gedeelde instellingen voor ALLE projecten in de solution.
+    Zet deze instellingen niet opnieuw in een individuele .csproj.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+</Project>

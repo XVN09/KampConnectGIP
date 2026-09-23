@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\200-Platform\210-Identity\212-Business\KampConnect.Identity.Business.Logic\KampConnect.Identity.Business.Logic.csproj" />
+    <ProjectReference Include="..\..\200-Platform\210-Identity\212-Business\KampConnect.Identity.Business.Contracts\KampConnect.Identity.Business.Contracts.csproj" />
+    <ProjectReference Include="..\..\200-Platform\210-Identity\211-Data\KampConnect.Identity.Data.Entity\KampConnect.Identity.Data.Entity.csproj" />
+  </ItemGroup>
+</Project>

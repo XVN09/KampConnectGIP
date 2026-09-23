@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\..\332-Business\KampConnect.Calling.Business.Logic\KampConnect.Calling.Business.Logic.csproj" />
+    <ProjectReference Include="..\..\332-Business\KampConnect.Calling.Business.Contracts\KampConnect.Calling.Business.Contracts.csproj" />
+    <ProjectReference Include="..\..\331-Data\KampConnect.Calling.Data.Repository\KampConnect.Calling.Data.Repository.csproj" />
+    <ProjectReference Include="..\..\331-Data\KampConnect.Calling.Data.Context\KampConnect.Calling.Data.Context.csproj" />
+    <ProjectReference Include="..\..\..\..\000-Shared\KampConnect.Shared.ServiceDefaults\KampConnect.Shared.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\..\..\000-Shared\KampConnect.Shared.Contracts\KampConnect.Shared.Contracts.csproj" />
+  </ItemGroup>
+</Project>
