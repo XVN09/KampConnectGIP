@@ -1,0 +1,27 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.5.4">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>8ee9c4e2-e8f5-403f-94ab-4fb723a060cd</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\100-Gateway\KampConnect.Gateway\KampConnect.Gateway.csproj" />
+    <ProjectReference Include="..\..\200-Platform\210-Identity\213-Service\KampConnect.Identity.Service\KampConnect.Identity.Service.csproj" />
+    <ProjectReference Include="..\..\200-Platform\220-Tenant\223-Service\KampConnect.Tenant.Service\KampConnect.Tenant.Service.csproj" />
+    <ProjectReference Include="..\..\200-Platform\230-User\233-Service\KampConnect.User.Service\KampConnect.User.Service.csproj" />
+    <ProjectReference Include="..\..\200-Platform\240-Compliance\243-Service\KampConnect.Compliance.Service\KampConnect.Compliance.Service.csproj" />
+    <ProjectReference Include="..\..\300-Kamp-Communicatie\310-Camp\313-Service\KampConnect.Camp.Service\KampConnect.Camp.Service.csproj" />
+    <ProjectReference Include="..\..\300-Kamp-Communicatie\320-Messaging\323-Service\KampConnect.Messaging.Service\KampConnect.Messaging.Service.csproj" />
+    <ProjectReference Include="..\..\300-Kamp-Communicatie\330-Calling\333-Service\KampConnect.Calling.Service\KampConnect.Calling.Service.csproj" />
+    <ProjectReference Include="..\..\300-Kamp-Communicatie\340-Media\343-Service\KampConnect.Media.Service\KampConnect.Media.Service.csproj" />
+    <ProjectReference Include="..\..\300-Kamp-Communicatie\350-Notification\353-Service\KampConnect.Notification.Service\KampConnect.Notification.Service.csproj" />
+    <ProjectReference Include="..\..\400-Betalingen\410-Billing\413-Service\KampConnect.Billing.Service\KampConnect.Billing.Service.csproj" />
+    <ProjectReference Include="..\..\400-Betalingen\420-Payment\423-Service\KampConnect.Payment.Service\KampConnect.Payment.Service.csproj" />
+  </ItemGroup>
+
+</Project>

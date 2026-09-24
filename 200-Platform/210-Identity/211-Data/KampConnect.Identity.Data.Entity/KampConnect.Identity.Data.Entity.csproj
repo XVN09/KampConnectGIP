@@ -1,3 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  </Project>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\000-Shared\020-Helpers\021-Logging\KampConnect.Shared.Logging.Config\KampConnect.Shared.Logging.Config.csproj" />
+  </ItemGroup>
+</Project>

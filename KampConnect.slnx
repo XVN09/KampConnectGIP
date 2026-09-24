@@ -3,6 +3,16 @@
     <Project Path="000-Shared/KampConnect.Shared.Contracts/KampConnect.Shared.Contracts.csproj" />
     <Project Path="000-Shared/KampConnect.Shared.ServiceDefaults/KampConnect.Shared.ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/000-Shared/010-Templates/" />
+  <Folder Name="/000-Shared/010-Templates/011-Entities/">
+    <File Path="EntityTemplate.cs" />
+  </Folder>
+  <Folder Name="/000-Shared/020-Helpers/" />
+  <Folder Name="/000-Shared/020-Helpers/021-Logging/">
+    <File Path="000-Shared/020-Helpers/021-Logging/README.md" />
+    <Project Path="000-Shared/020-Helpers/021-Logging/KampConnect.Shared.Logging.Config/KampConnect.Shared.Logging.Config.csproj" Id="63af94b9-6ce6-43c0-ab68-8a2465d6f53c" />
+    <Project Path="000-Shared/020-Helpers/021-Logging/KampConnect.Shared.Logging.Core/KampConnect.Shared.Logging.Core.csproj" Id="e60da555-1a07-407b-9716-2ed856a49926" />
+  </Folder>
   <Folder Name="/100-Gateway/">
     <Project Path="100-Gateway/KampConnect.Gateway/KampConnect.Gateway.csproj" />
   </Folder>
@@ -63,105 +73,108 @@
   <Folder Name="/200-Platform/240-Compliance/243-Service/">
     <Project Path="200-Platform/240-Compliance/243-Service/KampConnect.Compliance.Service/KampConnect.Compliance.Service.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/" />
-  <Folder Name="/300-Kamp-Communicatie/310-Camp/" />
-  <Folder Name="/300-Kamp-Communicatie/310-Camp/311-Data/">
+  <Folder Name="/300-Camp-Communication/" />
+  <Folder Name="/300-Camp-Communication/310-Camp/" />
+  <Folder Name="/300-Camp-Communication/310-Camp/311-Data/">
     <Project Path="300-Kamp-Communicatie/310-Camp/311-Data/KampConnect.Camp.Data.Context/KampConnect.Camp.Data.Context.csproj" />
     <Project Path="300-Kamp-Communicatie/310-Camp/311-Data/KampConnect.Camp.Data.Entity/KampConnect.Camp.Data.Entity.csproj" />
     <Project Path="300-Kamp-Communicatie/310-Camp/311-Data/KampConnect.Camp.Data.Interface/KampConnect.Camp.Data.Interface.csproj" />
     <Project Path="300-Kamp-Communicatie/310-Camp/311-Data/KampConnect.Camp.Data.Repository/KampConnect.Camp.Data.Repository.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/310-Camp/312-Business/">
+  <Folder Name="/300-Camp-Communication/310-Camp/312-Business/">
     <Project Path="300-Kamp-Communicatie/310-Camp/312-Business/KampConnect.Camp.Business.Contracts/KampConnect.Camp.Business.Contracts.csproj" />
     <Project Path="300-Kamp-Communicatie/310-Camp/312-Business/KampConnect.Camp.Business.Logic/KampConnect.Camp.Business.Logic.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/310-Camp/313-Service/">
+  <Folder Name="/300-Camp-Communication/310-Camp/313-Service/">
     <Project Path="300-Kamp-Communicatie/310-Camp/313-Service/KampConnect.Camp.Service/KampConnect.Camp.Service.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/320-Messaging/" />
-  <Folder Name="/300-Kamp-Communicatie/320-Messaging/321-Data/">
+  <Folder Name="/300-Camp-Communication/320-Messaging/" />
+  <Folder Name="/300-Camp-Communication/320-Messaging/321-Data/">
     <Project Path="300-Kamp-Communicatie/320-Messaging/321-Data/KampConnect.Messaging.Data.Context/KampConnect.Messaging.Data.Context.csproj" />
     <Project Path="300-Kamp-Communicatie/320-Messaging/321-Data/KampConnect.Messaging.Data.Entity/KampConnect.Messaging.Data.Entity.csproj" />
     <Project Path="300-Kamp-Communicatie/320-Messaging/321-Data/KampConnect.Messaging.Data.Interface/KampConnect.Messaging.Data.Interface.csproj" />
     <Project Path="300-Kamp-Communicatie/320-Messaging/321-Data/KampConnect.Messaging.Data.Repository/KampConnect.Messaging.Data.Repository.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/320-Messaging/322-Business/">
+  <Folder Name="/300-Camp-Communication/320-Messaging/322-Business/">
     <Project Path="300-Kamp-Communicatie/320-Messaging/322-Business/KampConnect.Messaging.Business.Contracts/KampConnect.Messaging.Business.Contracts.csproj" />
     <Project Path="300-Kamp-Communicatie/320-Messaging/322-Business/KampConnect.Messaging.Business.Logic/KampConnect.Messaging.Business.Logic.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/320-Messaging/323-Service/">
+  <Folder Name="/300-Camp-Communication/320-Messaging/323-Service/">
     <Project Path="300-Kamp-Communicatie/320-Messaging/323-Service/KampConnect.Messaging.Service/KampConnect.Messaging.Service.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/330-Calling/" />
-  <Folder Name="/300-Kamp-Communicatie/330-Calling/331-Data/">
+  <Folder Name="/300-Camp-Communication/330-Calling/" />
+  <Folder Name="/300-Camp-Communication/330-Calling/331-Data/">
     <Project Path="300-Kamp-Communicatie/330-Calling/331-Data/KampConnect.Calling.Data.Context/KampConnect.Calling.Data.Context.csproj" />
     <Project Path="300-Kamp-Communicatie/330-Calling/331-Data/KampConnect.Calling.Data.Entity/KampConnect.Calling.Data.Entity.csproj" />
     <Project Path="300-Kamp-Communicatie/330-Calling/331-Data/KampConnect.Calling.Data.Interface/KampConnect.Calling.Data.Interface.csproj" />
     <Project Path="300-Kamp-Communicatie/330-Calling/331-Data/KampConnect.Calling.Data.Repository/KampConnect.Calling.Data.Repository.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/330-Calling/332-Business/">
+  <Folder Name="/300-Camp-Communication/330-Calling/332-Business/">
     <Project Path="300-Kamp-Communicatie/330-Calling/332-Business/KampConnect.Calling.Business.Contracts/KampConnect.Calling.Business.Contracts.csproj" />
     <Project Path="300-Kamp-Communicatie/330-Calling/332-Business/KampConnect.Calling.Business.Logic/KampConnect.Calling.Business.Logic.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/330-Calling/333-Service/">
+  <Folder Name="/300-Camp-Communication/330-Calling/333-Service/">
     <Project Path="300-Kamp-Communicatie/330-Calling/333-Service/KampConnect.Calling.Service/KampConnect.Calling.Service.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/340-Media/" />
-  <Folder Name="/300-Kamp-Communicatie/340-Media/341-Data/">
+  <Folder Name="/300-Camp-Communication/340-Media/" />
+  <Folder Name="/300-Camp-Communication/340-Media/341-Data/">
     <Project Path="300-Kamp-Communicatie/340-Media/341-Data/KampConnect.Media.Data.Context/KampConnect.Media.Data.Context.csproj" />
     <Project Path="300-Kamp-Communicatie/340-Media/341-Data/KampConnect.Media.Data.Entity/KampConnect.Media.Data.Entity.csproj" />
     <Project Path="300-Kamp-Communicatie/340-Media/341-Data/KampConnect.Media.Data.Interface/KampConnect.Media.Data.Interface.csproj" />
     <Project Path="300-Kamp-Communicatie/340-Media/341-Data/KampConnect.Media.Data.Repository/KampConnect.Media.Data.Repository.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/340-Media/342-Business/">
+  <Folder Name="/300-Camp-Communication/340-Media/342-Business/">
     <Project Path="300-Kamp-Communicatie/340-Media/342-Business/KampConnect.Media.Business.Contracts/KampConnect.Media.Business.Contracts.csproj" />
     <Project Path="300-Kamp-Communicatie/340-Media/342-Business/KampConnect.Media.Business.Logic/KampConnect.Media.Business.Logic.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/340-Media/343-Service/">
+  <Folder Name="/300-Camp-Communication/340-Media/343-Service/">
     <Project Path="300-Kamp-Communicatie/340-Media/343-Service/KampConnect.Media.Service/KampConnect.Media.Service.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/350-Notification/" />
-  <Folder Name="/300-Kamp-Communicatie/350-Notification/351-Data/">
+  <Folder Name="/300-Camp-Communication/350-Notification/" />
+  <Folder Name="/300-Camp-Communication/350-Notification/351-Data/">
     <Project Path="300-Kamp-Communicatie/350-Notification/351-Data/KampConnect.Notification.Data.Context/KampConnect.Notification.Data.Context.csproj" />
     <Project Path="300-Kamp-Communicatie/350-Notification/351-Data/KampConnect.Notification.Data.Entity/KampConnect.Notification.Data.Entity.csproj" />
     <Project Path="300-Kamp-Communicatie/350-Notification/351-Data/KampConnect.Notification.Data.Interface/KampConnect.Notification.Data.Interface.csproj" />
     <Project Path="300-Kamp-Communicatie/350-Notification/351-Data/KampConnect.Notification.Data.Repository/KampConnect.Notification.Data.Repository.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/350-Notification/352-Business/">
+  <Folder Name="/300-Camp-Communication/350-Notification/352-Business/">
     <Project Path="300-Kamp-Communicatie/350-Notification/352-Business/KampConnect.Notification.Business.Contracts/KampConnect.Notification.Business.Contracts.csproj" />
     <Project Path="300-Kamp-Communicatie/350-Notification/352-Business/KampConnect.Notification.Business.Logic/KampConnect.Notification.Business.Logic.csproj" />
   </Folder>
-  <Folder Name="/300-Kamp-Communicatie/350-Notification/353-Service/">
+  <Folder Name="/300-Camp-Communication/350-Notification/353-Service/">
     <Project Path="300-Kamp-Communicatie/350-Notification/353-Service/KampConnect.Notification.Service/KampConnect.Notification.Service.csproj" />
   </Folder>
-  <Folder Name="/400-Betalingen/" />
-  <Folder Name="/400-Betalingen/410-Billing/" />
-  <Folder Name="/400-Betalingen/410-Billing/411-Data/">
+  <Folder Name="/400-Payments/" />
+  <Folder Name="/400-Payments/410-Billing/" />
+  <Folder Name="/400-Payments/410-Billing/411-Data/">
     <Project Path="400-Betalingen/410-Billing/411-Data/KampConnect.Billing.Data.Context/KampConnect.Billing.Data.Context.csproj" />
     <Project Path="400-Betalingen/410-Billing/411-Data/KampConnect.Billing.Data.Entity/KampConnect.Billing.Data.Entity.csproj" />
     <Project Path="400-Betalingen/410-Billing/411-Data/KampConnect.Billing.Data.Interface/KampConnect.Billing.Data.Interface.csproj" />
     <Project Path="400-Betalingen/410-Billing/411-Data/KampConnect.Billing.Data.Repository/KampConnect.Billing.Data.Repository.csproj" />
   </Folder>
-  <Folder Name="/400-Betalingen/410-Billing/412-Business/">
+  <Folder Name="/400-Payments/410-Billing/412-Business/">
     <Project Path="400-Betalingen/410-Billing/412-Business/KampConnect.Billing.Business.Contracts/KampConnect.Billing.Business.Contracts.csproj" />
     <Project Path="400-Betalingen/410-Billing/412-Business/KampConnect.Billing.Business.Logic/KampConnect.Billing.Business.Logic.csproj" />
   </Folder>
-  <Folder Name="/400-Betalingen/410-Billing/413-Service/">
+  <Folder Name="/400-Payments/410-Billing/413-Service/">
     <Project Path="400-Betalingen/410-Billing/413-Service/KampConnect.Billing.Service/KampConnect.Billing.Service.csproj" />
   </Folder>
-  <Folder Name="/400-Betalingen/420-Payment/" />
-  <Folder Name="/400-Betalingen/420-Payment/421-Data/">
+  <Folder Name="/400-Payments/420-Payment/" />
+  <Folder Name="/400-Payments/420-Payment/421-Data/">
     <Project Path="400-Betalingen/420-Payment/421-Data/KampConnect.Payment.Data.Context/KampConnect.Payment.Data.Context.csproj" />
     <Project Path="400-Betalingen/420-Payment/421-Data/KampConnect.Payment.Data.Entity/KampConnect.Payment.Data.Entity.csproj" />
     <Project Path="400-Betalingen/420-Payment/421-Data/KampConnect.Payment.Data.Interface/KampConnect.Payment.Data.Interface.csproj" />
     <Project Path="400-Betalingen/420-Payment/421-Data/KampConnect.Payment.Data.Repository/KampConnect.Payment.Data.Repository.csproj" />
   </Folder>
-  <Folder Name="/400-Betalingen/420-Payment/422-Business/">
+  <Folder Name="/400-Payments/420-Payment/422-Business/">
     <Project Path="400-Betalingen/420-Payment/422-Business/KampConnect.Payment.Business.Contracts/KampConnect.Payment.Business.Contracts.csproj" />
     <Project Path="400-Betalingen/420-Payment/422-Business/KampConnect.Payment.Business.Logic/KampConnect.Payment.Business.Logic.csproj" />
   </Folder>
-  <Folder Name="/400-Betalingen/420-Payment/423-Service/">
+  <Folder Name="/400-Payments/420-Payment/423-Service/">
     <Project Path="400-Betalingen/420-Payment/423-Service/KampConnect.Payment.Service/KampConnect.Payment.Service.csproj" />
+  </Folder>
+  <Folder Name="/800 - Hosting/">
+    <Project Path="800 - Hosting/AspireAppHost/KampConnect.Hosting.AppHost.csproj" />
   </Folder>
   <Folder Name="/900-Tests/">
     <Project Path="900-Tests/KampConnect.Billing.Tests/KampConnect.Billing.Tests.csproj" />
