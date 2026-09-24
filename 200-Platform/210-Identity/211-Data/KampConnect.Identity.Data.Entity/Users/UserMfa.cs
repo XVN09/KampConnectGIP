@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using KampConnect.Shared.Logging.Config.Tools;
@@ -12,35 +10,30 @@ public class UserMfa
 {
     #region Properties
     [Key]
-    public Guid user_mfa_id { get; set; }
+    public int user_mfa_id { get; set; }
 
-    [Key]
-    public Guid user_id { get; set; }
+    public required int user_id { get; set; }
 
-    [Required]
+    [MaxLength(30)]
     public required string mfa_type { get; set; }
 
-    [Required]
-    public required string secret_encrypted { get; set; }
+    public required byte[] secret_encrypted { get; set; }
 
-    [Required]
     public required bool is_confirmed { get; set; }
 
     public DateTime? last_used { get; set; }
 
-    [Required]
-    public required DateTime created_at { get; set; }
+    public required DateTime creation_timestamp { get; set; }
 
-    public DateTime? updated_at { get; set; }
-
+    public DateTime? modification_timestamp { get; set; }
     #endregion
 
     #region Navigation Properties
-
+    [ForeignKey(nameof(user_id))]
+    public User? User { get; set; }
     #endregion
 
     #region ToString
-
     public override string ToString()
     {
         return this.DumpObject();

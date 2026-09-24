@@ -1,23 +1,21 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 using KampConnect.Shared.Logging.Config.Tools;
 
+namespace KampConnect.Identity.Data.Entity.Clients;
 
-namespace KampConnect.Identity.Data.Entity.Client;
-
-[Table("sec_client_parameter", Schema = "client")]
+[Table("sec_client_parameter", Schema = "clients")]
 public class ClientParameter
 {
     #region Properties
     [Key]
-    public Guid client_parameter_id { get; set; }
+    public int client_parameter_id { get; set; }
 
-    [Required]
+    [MaxLength(100)]
     public required string client_parameter_name { get; set; }
 
+    [MaxLength(500)]
     public string? client_parameter_description { get; set; }
     #endregion
 
@@ -26,7 +24,6 @@ public class ClientParameter
     #endregion
 
     #region ToString
-
     public override string ToString()
     {
         return this.DumpObject();

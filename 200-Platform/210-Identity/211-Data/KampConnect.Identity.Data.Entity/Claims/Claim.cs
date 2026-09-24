@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using KampConnect.Shared.Logging.Config.Tools;
@@ -12,27 +11,25 @@ public class Claim
 {
     #region Properties
     [Key]
-    public Guid claim_id { get; set; }
+    public int claim_id { get; set; }
 
-    [Required]
+    [MaxLength(100)]
     public required string claim_type { get; set; }
 
-    public string claim_description { get; set; }
+    [MaxLength(500)]
+    public string? claim_description { get; set; }
 
-    [Required]
-    public required DateTime created_at { get; set; } = DateTime.UtcNow;
+    public required DateTime creation_timestamp { get; set; }
 
-    public DateTime? updated_at { get; set; }
+    public DateTime? modification_timestamp { get; set; }
     #endregion
 
     #region Navigation Properties
-    public ICollection<Claim> Claims { get; set; } = new List<Claim>();
-    public ICollection<UserClaim> Users { get; set; } = new List<UserClaim>();
-
+    public ICollection<ClientClaim> ClientClaims { get; set; } = new List<ClientClaim>();
+    public ICollection<UserClaim> UserClaims { get; set; } = new List<UserClaim>();
     #endregion
 
     #region ToString
-
     public override string ToString()
     {
         return this.DumpObject();
