@@ -25,7 +25,6 @@ public class Claim
     #endregion
 
     #region Navigation Properties
-    public ICollection<ClientClaim> ClientClaims { get; set; } = new List<ClientClaim>();
     public ICollection<UserClaim> UserClaims { get; set; } = new List<UserClaim>();
     #endregion
 

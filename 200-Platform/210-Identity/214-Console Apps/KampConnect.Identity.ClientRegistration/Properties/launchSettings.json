@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KampConnect.Identity.ClientRegistration": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

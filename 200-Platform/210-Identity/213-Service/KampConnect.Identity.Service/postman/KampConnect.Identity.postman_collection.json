@@ -1,0 +1,245 @@
+{
+  "info": {
+    "_postman_id": "b7a2f9d0-1c3e-4a9c-9d1a-kcidentitycol01",
+    "name": "KampConnect Identity Service",
+    "description": "Testcollectie voor de KampConnect Identity Service (OAuth2/OIDC via OpenIddict + accountbeheer).\n\nVoorwaarden:\n1. Start de service met profiel \"http\" (poort 5009).\n2. Draai eenmalig de KampConnect.Identity.ClientRegistration console-app zodat clients, scopes, rollen en de testgebruiker bestaan.\n3. Selecteer de environment \"KampConnect Identity - Local\" in Postman.\n\nDe OAuth2-login-flow zelf zet je op via het tabblad Authorization van de map \"OAuth2 - Login flow\" (zie de folder-level auth hieronder) — dat kan niet volledig als losse request want er zit een browser-redirect + login-pagina tussen.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Discovery",
+      "item": [
+        {
+          "name": "OpenID configuration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/.well-known/openid-configuration",
+              "host": [ "{{host}}" ],
+              "path": [ ".well-known", "openid-configuration" ]
+            }
+          }
+        },
+        {
+          "name": "JWKS (publieke sleutels)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/.well-known/jwks.json",
+              "host": [ "{{host}}" ],
+              "path": [ ".well-known", "jwks.json" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "OAuth2 - Login flow",
+      "description": "Stel hier bovenaan (tabblad Authorization van deze folder) OAuth 2.0 in met:\n- Grant Type: Authorization Code (With PKCE)\n- Auth URL: {{host}}/oauth2/authorize\n- Access Token URL: {{host}}/oauth2/token\n- Client ID: {{clientId}}\n- Client Secret: (leeg, public client)\n- Scope: {{scope}}\n- Code Challenge Method: SHA-256\n- Callback URL: {{callbackUrl}}\n\nKlik \"Get New Access Token\" -> log in met de testgebruiker (admin@kampconnect.local + wachtwoord uit user-secrets) -> token wordt automatisch in {{accessToken}} gezet via de test-script hieronder op de userinfo-request, of kopieer het handmatig.",
+      "auth": {
+        "type": "oauth2",
+        "oauth2": [
+          { "key": "grant_type", "value": "authorization_code_with_pkce", "type": "string" },
+          { "key": "authUrl", "value": "{{host}}/oauth2/authorize", "type": "string" },
+          { "key": "accessTokenUrl", "value": "{{host}}/oauth2/token", "type": "string" },
+          { "key": "clientId", "value": "{{clientId}}", "type": "string" },
+          { "key": "scope", "value": "{{scope}}", "type": "string" },
+          { "key": "redirect_uri", "value": "{{callbackUrl}}", "type": "string" },
+          { "key": "challengeAlgorithm", "value": "S256", "type": "string" },
+          { "key": "addTokenTo", "value": "header", "type": "string" },
+          { "key": "client_authentication", "value": "body", "type": "string" }
+        ]
+      },
+      "item": [
+        {
+          "name": "Userinfo (ingelogde gebruiker)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Bewaar het gebruikte access token automatisch voor hergebruik in andere requests",
+                  "const auth = pm.request.headers.get('Authorization');",
+                  "if (auth && auth.startsWith('Bearer ')) {",
+                  "    pm.environment.set('accessToken', auth.substring(7).trim());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/oauth2/userinfo",
+              "host": [ "{{host}}" ],
+              "path": [ "oauth2", "userinfo" ]
+            }
+          }
+        },
+        {
+          "name": "Userinfo (met bewaarde accessToken)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/oauth2/userinfo",
+              "host": [ "{{host}}" ],
+              "path": [ "oauth2", "userinfo" ]
+            }
+          }
+        },
+        {
+          "name": "Token vernieuwen (refresh_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Nieuw access token + nieuw (roterend) refresh token bewaren voor hergebruik",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.access_token) pm.environment.set('accessToken', body.access_token.trim());",
+                  "    if (body.refresh_token) pm.environment.set('refreshToken', body.refresh_token.trim());",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "refresh_token", "type": "text" },
+                { "key": "refresh_token", "value": "{{refreshToken}}", "type": "text" },
+                { "key": "client_id", "value": "{{clientId}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{host}}/oauth2/token",
+              "host": [ "{{host}}" ],
+              "path": [ "oauth2", "token" ]
+            },
+            "description": "Belangrijk: client_id moet altijd expliciet in de body staan (public client, geen secret). Vul {{refreshToken}} in de environment in (kopieer uit de vorige token-response) of gebruik eerst de OAuth2-login-flow zodat het test-script hierboven dit automatisch invult."
+          }
+        },
+        {
+          "name": "Token verwijderen (logout / revoke)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "token", "value": "{{accessToken}}", "type": "text" },
+                { "key": "client_id", "value": "{{clientId}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{host}}/oauth2/revoke",
+              "host": [ "{{host}}" ],
+              "path": [ "oauth2", "revoke" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Registreren",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"invitationToken\": null\n}"
+            },
+            "url": {
+              "raw": "{{host}}/api/account/register",
+              "host": [ "{{host}}" ],
+              "path": [ "api", "account", "register" ]
+            },
+            "description": "De verificatiemail staat in de console-log van de service (LoggingMailSender). Kopieer het token uit de link naar de variabele emailVerificationToken."
+          }
+        },
+        {
+          "name": "E-mail bevestigen",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{emailVerificationToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{host}}/api/account/verify-email",
+              "host": [ "{{host}}" ],
+              "path": [ "api", "account", "verify-email" ]
+            }
+          }
+        },
+        {
+          "name": "Wachtwoord vergeten",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{host}}/api/account/forgot-password",
+              "host": [ "{{host}}" ],
+              "path": [ "api", "account", "forgot-password" ]
+            },
+            "description": "Geeft altijd 204 terug (ook als het e-mailadres niet bestaat). De herstelmail staat in de console-log; kopieer het token naar passwordResetToken."
+          }
+        },
+        {
+          "name": "Nieuw wachtwoord instellen",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{passwordResetToken}}\",\n  \"newPassword\": \"NogEenLangWachtwoord!\"\n}"
+            },
+            "url": {
+              "raw": "{{host}}/api/account/reset-password",
+              "host": [ "{{host}}" ],
+              "path": [ "api", "account", "reset-password" ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using KampConnect.Identity.Data.Entity.AuthFlow;
 using KampConnect.Identity.Data.Entity.Claims;
 using KampConnect.Identity.Data.Entity.Roles;
 using KampConnect.Shared.Logging.Config.Tools;
@@ -53,8 +52,6 @@ public class User
     public ICollection<ExternalIdentity> ExternalIdentities { get; set; } = new List<ExternalIdentity>();
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public ICollection<UserClaim> UserClaims { get; set; } = new List<UserClaim>();
-    public ICollection<AuthCode> AuthCodes { get; set; } = new List<AuthCode>();
-    public ICollection<AuthRefreshToken> AuthRefreshTokens { get; set; } = new List<AuthRefreshToken>();
     #endregion
 
     #region ToString

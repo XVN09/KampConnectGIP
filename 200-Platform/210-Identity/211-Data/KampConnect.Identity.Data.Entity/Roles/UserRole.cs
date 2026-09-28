@@ -6,6 +6,9 @@ using KampConnect.Shared.Logging.Config.Tools;
 
 namespace KampConnect.Identity.Data.Entity.Roles;
 
+/// <summary>
+/// Koppeling gebruiker ↔ rol binnen een tenant. tenant_id is null bij een platformrol.
+/// </summary>
 [Table("sec_user_role", Schema = "roles")]
 public class UserRole
 {
@@ -13,7 +16,7 @@ public class UserRole
     [Key]
     public int user_role_id { get; set; }
 
-    public required int client_role_id { get; set; }
+    public required int role_id { get; set; }
 
     public required int user_id { get; set; }
 
@@ -25,8 +28,8 @@ public class UserRole
     #endregion
 
     #region Navigation Properties
-    [ForeignKey(nameof(client_role_id))]
-    public ClientRole? ClientRole { get; set; }
+    [ForeignKey(nameof(role_id))]
+    public Role? Role { get; set; }
 
     [ForeignKey(nameof(user_id))]
     public User? User { get; set; }

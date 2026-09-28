@@ -1,5 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="OpenIddict.AspNetCore" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\212-Business\KampConnect.Identity.Business.Logic\KampConnect.Identity.Business.Logic.csproj" />
     <ProjectReference Include="..\..\212-Business\KampConnect.Identity.Business.Contracts\KampConnect.Identity.Business.Contracts.csproj" />
     <ProjectReference Include="..\..\211-Data\KampConnect.Identity.Data.Repository\KampConnect.Identity.Data.Repository.csproj" />

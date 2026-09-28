@@ -1,0 +1,59 @@
+### =====================================================================
+### Handmatig testen van de Identity-service (Visual Studio: "Send request")
+### Start eerst de service met het profiel "http" (poort 5009) en draai
+### één keer de console-app ClientRegistration (clients, rollen, testgebruiker).
+### =====================================================================
+
+@host = http://localhost:5009
+
+### Discovery-document: alle endpoints + ondersteunde flows
+GET {{host}}/.well-known/openid-configuration
+
+### Publieke sleutels (hiermee valideren de andere services de tokens)
+GET {{host}}/.well-known/jwks.json
+
+### Account aanmaken → 201 { "userId": ... }
+### De verificatiemail staat in de console-log (LoggingMailSender), kopieer het token uit de link.
+POST {{host}}/api/account/register
+Content-Type: application/json
+
+{
+  "email": "test@kampconnect.local",
+  "password": "EenLangGenoegWachtwoord!",
+  "invitationToken": null
+}
+
+### E-mail bevestigen → 204
+POST {{host}}/api/account/verify-email
+Content-Type: application/json
+
+{ "token": "<token uit de log>" }
+
+### Wachtwoord vergeten → altijd 204 (herstelmail in de log)
+POST {{host}}/api/account/forgot-password
+Content-Type: application/json
+
+{ "email": "test@kampconnect.local" }
+
+### Nieuw wachtwoord → 204
+POST {{host}}/api/account/reset-password
+Content-Type: application/json
+
+{ "token": "<token uit de log>", "newPassword": "NogEenLangWachtwoord!" }
+
+### -------------------------------------------------------------------------
+### De login-flow zelf (authorize → login → token) test je het makkelijkst met
+### Postman: Authorization → OAuth 2.0 → Grant type "Authorization Code (With PKCE)"
+###   Auth URL:      http://localhost:5009/oauth2/authorize
+###   Token URL:     http://localhost:5009/oauth2/token
+###   Client ID:     kampconnect-postman
+###   Callback URL:  https://oauth.pstmn.io/v1/callback
+###   Scope:         openid email roles offline_access
+### Plak daarna het access token hieronder.
+### -------------------------------------------------------------------------
+
+@accessToken = <access token>
+
+### Gegevens van de ingelogde gebruiker
+GET {{host}}/oauth2/userinfo
+Authorization: Bearer {{accessToken}}

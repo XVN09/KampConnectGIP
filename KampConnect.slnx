@@ -31,6 +31,9 @@
   <Folder Name="/200-Platform/210-Identity/213-Service/">
     <Project Path="200-Platform/210-Identity/213-Service/KampConnect.Identity.Service/KampConnect.Identity.Service.csproj" />
   </Folder>
+  <Folder Name="/200-Platform/210-Identity/214-Console Apps/">
+    <Project Path="200-Platform/210-Identity/214-Console Apps/KampConnect.Identity.ClientRegistration/KampConnect.Identity.ClientRegistration.csproj" Id="fb696747-bc68-4fe3-bb56-f9dd04430f46" />
+  </Folder>
   <Folder Name="/200-Platform/220-Tenant/" />
   <Folder Name="/200-Platform/220-Tenant/221-Data/">
     <Project Path="200-Platform/220-Tenant/221-Data/KampConnect.Tenant.Data.Context/KampConnect.Tenant.Data.Context.csproj" />

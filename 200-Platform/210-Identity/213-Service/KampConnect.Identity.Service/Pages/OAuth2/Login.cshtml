@@ -1,0 +1,73 @@
+@page "/oauth2/login"
+@model KampConnect.Identity.Service.Pages.OAuth2.LoginModel
+@{
+    // Eigen, volledige HTML (geen _Layout): deze pagina is het enige scherm van de Identity-service.
+    // Kleuren = de KampConnect-tokens uit Figma (brand/500 #409070, ink #1b231f, bg #f6f8f5, …).
+}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inloggen – KampConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --brand-50: #eef6f1; --brand-100: #d7ebe0; --brand-500: #409070; --brand-600: #2f7a5c; --brand-700: #27634b;
+            --ink: #1b231f; --ink-2: #525c56; --ink-3: #828d87;
+            --line-2: #d6dcd4; --bg: #f6f8f5; --surface: #ffffff;
+            --rose: #de5969; --rose-soft: #f6dadd;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
+               background: var(--bg); color: var(--ink); font: 400 16px/1.6 "Plus Jakarta Sans", system-ui, sans-serif; }
+        .card { width: 100%; max-width: 400px; background: var(--surface); border-radius: 22px; padding: 32px 28px;
+                box-shadow: 0 2px 6px rgba(47,122,92,.18), 0 6px 18px rgba(39,99,75,.22); }
+        .logo { display: block; height: 52px; margin: 0 auto 20px; }
+        h1 { font: 700 26px/1.1 "Bricolage Grotesque", system-ui, sans-serif; margin: 0 0 4px; text-align: center; }
+        .sub { color: var(--ink-2); text-align: center; margin: 0 0 24px; font-size: 14px; }
+        label { display: block; font-weight: 600; font-size: 14px; margin: 14px 0 6px; }
+        input { width: 100%; font: inherit; padding: 12px 14px; border: 1.5px solid var(--line-2); border-radius: 12px; background: var(--surface); }
+        input:focus { outline: none; border-color: var(--brand-500); box-shadow: 0 0 0 3px var(--brand-100); }
+        .field-error { color: var(--rose); font-size: 13px; }
+        .alert { background: var(--rose-soft); color: #8f2a36; border-radius: 12px; padding: 10px 14px; font-size: 14px; margin-bottom: 8px; }
+        button { width: 100%; margin-top: 22px; padding: 13px; border: 0; border-radius: 999px; cursor: pointer;
+                 background: var(--brand-500); color: #fff; font: 600 16px "Plus Jakarta Sans", sans-serif; }
+        button:hover { background: var(--brand-600); }
+        .links { text-align: center; margin-top: 18px; font-size: 14px; }
+        .links a { color: var(--brand-700); font-weight: 600; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <img class="logo" src="~/img/kampconnect-logo.png" alt="KampConnect" />
+        <h1>Welkom terug</h1>
+        <p class="sub">Log in met je KampConnect-account</p>
+
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert" role="alert">@Model.ErrorMessage</div>
+        }
+
+        @* method="post" → de form-taghelper voegt automatisch het antiforgery-token toe *@
+        <form method="post" novalidate>
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <label asp-for="Input.Email">E-mailadres</label>
+            <input asp-for="Input.Email" type="email" autocomplete="username" autofocus />
+            <span class="field-error" asp-validation-for="Input.Email"></span>
+
+            <label asp-for="Input.Password">Wachtwoord</label>
+            <input asp-for="Input.Password" type="password" autocomplete="current-password" />
+            <span class="field-error" asp-validation-for="Input.Password"></span>
+
+            <button type="submit">Inloggen</button>
+        </form>
+
+        @* De pagina's voor wachtwoord vergeten/registreren horen bij de frontend (web/app);
+           die roepen /api/account/... aan. *@
+        <p class="links"><a href="https://kampconnect.be/forgot-password">Wachtwoord vergeten?</a></p>
+    </main>
+</body>
+</html>
