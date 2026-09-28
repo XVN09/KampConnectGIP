@@ -10,11 +10,11 @@
       3. De solution folder van een project is gelijk aan zijn pad op schijf.
       4. Projectnamen volgen de conventie KampConnect.<...>.
       5. Projectreferenties volgen de afhankelijkheidsregels (geen referenties tussen services,
-         lagen enkel naar binnen).
+         lagen enkel naar binnen). Zie docs/adr/0001 en 0003.
     Het script eindigt met exitcode 1 als er iets fout is, zodat het ook in CI gebruikt kan worden.
 
 .EXAMPLE
-    .\scripts\Test-Structure.ps1
+    .\backend\scripts\Test-Structure.ps1
 #>
 [CmdletBinding()]
 param()
@@ -32,21 +32,31 @@ $allowed = @{
     'Business.Contracts' = @()
     'Business.Logic'     = @('Business.Contracts', 'Data.Interface', 'Data.Entity', 'Shared.Contracts')
     'Service'            = @('Business.Logic', 'Business.Contracts', 'Data.Repository', 'Data.Context',
-                             'Shared.ServiceDefaults', 'Shared.Contracts')
+                             'Shared.ServiceDefaults', 'Shared.Contracts', 'Shared.Logging.Core')
     'Tests'              = @('Business.Logic', 'Business.Contracts', 'Data.Entity', 'Data.Interface',
                              'Data.Repository', 'Data.Context', 'Service', 'Shared.Contracts')
+    # Console-apps (map 'NNN-Console Apps' binnen een service) gebruiken de lagen van hun eigen service.
+    'ConsoleApp'         = @('Data.Entity', 'Data.Context', 'Data.Interface', 'Data.Repository',
+                             'Business.Contracts', 'Business.Logic', 'Shared.Contracts', 'Shared.Logging.Core')
 }
 $allowedShared = @{
     'Shared.Contracts'       = @()
     'Shared.ServiceDefaults' = @()
+    'Shared.Logging.Config'  = @()
+    'Shared.Logging.Core'    = @('Shared.Logging.Config')
     'Gateway'                = @('Shared.ServiceDefaults')
+    # De Aspire AppHost start alle services en mag daarom naar elk Service-project verwijzen.
+    'Hosting.AppHost'        = @('Gateway', 'Service')
 }
+# Mag vanuit elk project gebruikt worden: configuratie en hulpfuncties zoals DumpObject().
+$allowedEverywhere = @('Shared.Logging.Config')
 
 function Split-KcName([string]$ProjectName) {
     # KampConnect.Camp.Data.Entity -> Service = Camp, Layer = Data.Entity
-    # KampConnect.Shared.Contracts / KampConnect.Gateway -> Service = '', Layer = Shared.Contracts / Gateway
+    # KampConnect.Shared.Contracts / KampConnect.Gateway / KampConnect.Hosting.AppHost
+    #   -> Service = '', Layer = Shared.Contracts / Gateway / Hosting.AppHost
     $rest = $ProjectName -replace '^KampConnect\.', ''
-    if ($rest -like 'Shared.*' -or $rest -eq 'Gateway') { return @{ Service = ''; Layer = $rest } }
+    if ($rest -like 'Shared.*' -or $rest -eq 'Gateway' -or $rest -like 'Hosting.*') { return @{ Service = ''; Layer = $rest } }
     $parts = $rest -split '\.', 2
     if ($parts.Count -lt 2) { return @{ Service = $rest; Layer = '' } }
     return @{ Service = $parts[0]; Layer = $parts[1] }
@@ -64,7 +74,7 @@ foreach ($node in @($sln.SelectNodes('//Project'))) {
 }
 
 $diskProjects = @(
-    Get-ChildItem -Path $RepoRoot -Recurse -Filter *.csproj -File |
+    Get-ChildItem -Path $BackendRoot -Recurse -Filter *.csproj -File |
         Where-Object { $_.FullName -notmatch '[\\/](bin|obj|\.git|\.vs)[\\/]' } |
         ForEach-Object { Get-KcRelativePath $_.FullName }
 )
@@ -94,15 +104,20 @@ foreach ($path in $diskProjects) {
     }
 
     $me = Split-KcName $name
+    # Een console-app staat in een map 'NNN-Console Apps' binnen zijn service.
+    if ($me.Service -ne '' -and $dirs.Count -ge 3 -and $dirs[$dirs.Count - 3] -match '^\d{3}-Console Apps$') {
+        $me.Layer = 'ConsoleApp'
+    }
     $table = if ($me.Service -eq '') { $allowedShared } else { $allowed }
     if (-not $table.ContainsKey($me.Layer)) { $errors.Add("Onbekende laag '$($me.Layer)' in project $name"); continue }
-    $rules = @($table[$me.Layer])
+    $rules = @($table[$me.Layer]) + $allowedEverywhere
 
-    [xml]$proj = Get-Content -LiteralPath (Join-Path $RepoRoot $path) -Raw
+    [xml]$proj = Get-Content -LiteralPath (Join-Path $BackendRoot $path) -Raw
     foreach ($ref in @($proj.SelectNodes('//ProjectReference'))) {
         $refName = [System.IO.Path]::GetFileNameWithoutExtension($ref.GetAttribute('Include').Replace('\', '/'))
         $other   = Split-KcName $refName
-        if ($other.Service -ne '' -and $other.Service -ne $me.Service) {
+        $otherService = $other.Service -ne '' -and $other.Service -ne $me.Service
+        if ($otherService -and $me.Layer -ne 'Hosting.AppHost') {
             $errors.Add("$name verwijst naar een andere service: $refName")
         }
         elseif ($rules -notcontains $other.Layer) {

@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "KampConnect.Hosting.AppHost.csproj"
+  }
+}

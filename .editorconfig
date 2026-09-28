@@ -10,6 +10,10 @@ trim_trailing_whitespace = true
 [*.{csproj,props,targets,slnx,xml,json,yml,yaml}]
 indent_size = 2
 
+# Dart en Flutter (apps/, packages/) gebruiken 2 spaties
+[*.dart]
+indent_size = 2
+
 [*.cs]
 # Namespaces
 csharp_style_namespace_declarations = file_scoped:suggestion

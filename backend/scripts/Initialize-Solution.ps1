@@ -13,7 +13,7 @@ param()
 
 . (Join-Path $PSScriptRoot 'KampConnect.Common.ps1')
 
-if (Test-Path (Join-Path $RepoRoot '000-Shared')) {
+if (Test-Path (Join-Path $BackendRoot '000-Shared')) {
     throw 'De solution is al opgezet. Gebruik New-Service.ps1 om een service toe te voegen.'
 }
 
@@ -27,17 +27,17 @@ Add-KcReference -From $gateway -To $serviceDefaults
 
 # --- Microservices ---------------------------------------------------------------
 $services = @(
-    @{ Name = 'Identity';     Group = '200-Platform';          Number = 210 }
-    @{ Name = 'Tenant';       Group = '200-Platform';          Number = 220 }
-    @{ Name = 'User';         Group = '200-Platform';          Number = 230 }
-    @{ Name = 'Compliance';   Group = '200-Platform';          Number = 240 }
-    @{ Name = 'Camp';         Group = '300-Kamp-Communicatie'; Number = 310 }
-    @{ Name = 'Messaging';    Group = '300-Kamp-Communicatie'; Number = 320 }
-    @{ Name = 'Calling';      Group = '300-Kamp-Communicatie'; Number = 330 }
-    @{ Name = 'Media';        Group = '300-Kamp-Communicatie'; Number = 340 }
-    @{ Name = 'Notification'; Group = '300-Kamp-Communicatie'; Number = 350 }
-    @{ Name = 'Billing';      Group = '400-Betalingen';        Number = 410 }
-    @{ Name = 'Payment';      Group = '400-Betalingen';        Number = 420 }
+    @{ Name = 'Identity';     Group = '200-Platform';           Number = 210 }
+    @{ Name = 'Tenant';       Group = '200-Platform';           Number = 220 }
+    @{ Name = 'User';         Group = '200-Platform';           Number = 230 }
+    @{ Name = 'Compliance';   Group = '200-Platform';           Number = 240 }
+    @{ Name = 'Camp';         Group = '300-Camp-Communication'; Number = 310 }
+    @{ Name = 'Messaging';    Group = '300-Camp-Communication'; Number = 320 }
+    @{ Name = 'Calling';      Group = '300-Camp-Communication'; Number = 330 }
+    @{ Name = 'Media';        Group = '300-Camp-Communication'; Number = 340 }
+    @{ Name = 'Notification'; Group = '300-Camp-Communication'; Number = 350 }
+    @{ Name = 'Billing';      Group = '400-Payments';           Number = 410 }
+    @{ Name = 'Payment';      Group = '400-Payments';           Number = 420 }
 )
 
 foreach ($s in $services) {

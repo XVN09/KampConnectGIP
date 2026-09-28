@@ -4,9 +4,10 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$script:RepoRoot      = Split-Path -Parent $PSScriptRoot
-$script:Solution      = Join-Path $script:RepoRoot 'KampConnect.slnx'
-$script:PackagesProps = Join-Path $script:RepoRoot 'Directory.Packages.props'
+# De scripts staan in backend/scripts; de backend-map (met KampConnect.slnx) is de map erboven.
+$script:BackendRoot   = Split-Path -Parent $PSScriptRoot
+$script:Solution      = Join-Path $script:BackendRoot 'KampConnect.slnx'
+$script:PackagesProps = Join-Path $script:BackendRoot 'Directory.Packages.props'
 
 # Bestanden die de dotnet-templates aanmaken maar die we niet willen houden.
 $script:TemplateLeftovers = @(
@@ -26,12 +27,12 @@ function Invoke-Dotnet {
 }
 
 function Get-KcRelativePath {
-    # Pad relatief t.o.v. de repo-root, altijd met '/' als scheidingsteken.
+    # Pad relatief t.o.v. de backend-map, altijd met '/' als scheidingsteken.
     param([Parameter(Mandatory)][string]$Path)
     $full = [System.IO.Path]::GetFullPath($Path)
-    $root = [System.IO.Path]::GetFullPath($script:RepoRoot).TrimEnd('\', '/')
+    $root = [System.IO.Path]::GetFullPath($script:BackendRoot).TrimEnd('\', '/')
     if (-not $full.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {
-        throw "Pad '$full' ligt niet in de repository."
+        throw "Pad '$full' ligt niet in de backend-map."
     }
     return $full.Substring($root.Length).TrimStart('\', '/').Replace('\', '/')
 }
@@ -86,10 +87,10 @@ function Add-KcProject {
     param(
         [Parameter(Mandatory)][string]$Template,
         [Parameter(Mandatory)][string]$Name,
-        [Parameter(Mandatory)][string]$Directory,   # relatief t.o.v. de repo-root, bv. 300-Kamp-Communicatie/310-Camp/311-Data
+        [Parameter(Mandatory)][string]$Directory,   # relatief t.o.v. de backend-map, bv. 300-Camp-Communication/310-Camp/311-Data
         [string[]]$TemplateArgs = @()
     )
-    $projectDir = Join-Path $script:RepoRoot (Join-Path $Directory $Name)
+    $projectDir = Join-Path $script:BackendRoot (Join-Path $Directory $Name)
     if (Test-Path -LiteralPath $projectDir) { throw "Project bestaat al: $projectDir" }
 
     Invoke-Dotnet new $Template -n $Name -o $projectDir --no-restore @TemplateArgs

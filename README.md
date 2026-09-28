@@ -1,43 +1,31 @@
 # KampConnect
 
-Communicatie-app voor jeugdkampen: Flutter-app met een microservices-backend in C# .NET.
+Communicatie-app voor jeugdkampen: een Flutter-app en webfrontends met een microservices-backend in C# .NET.
+Alles zit in één repository; waarom staat in [ADR 0002](docs/adr/0002-monorepo.md).
 
 ## Structuur
 
-De mappen op schijf en de solution folders in `KampConnect.slnx` zijn identiek.
-
 | Map | Inhoud |
 |---|---|
-| `000-Shared` | Gedeelde contracten (events) en basisconfiguratie van services |
-| `100-Gateway` | API-gateway, het enige toegangspunt voor de app |
-| `200-Platform` | Identity, Tenant, User, Compliance |
-| `300-Kamp-Communicatie` | Camp, Messaging, Calling, Media, Notification |
-| `400-Betalingen` | Billing, Payment |
-| `900-Tests` | Eén testproject per service |
-| `scripts` | Scripts om services aan te maken en de structuur te controleren |
-| `docs/adr` | Vastgelegde architectuurbeslissingen |
+| `backend/` | .NET-solution met alle microservices, de gateway, de AppHost en de tests ([README](backend/README.md)) |
+| `apps/` | Frontends: Flutter-app, webdashboard en ouderportaal |
+| `packages/` | Gedeelde Dart-code voor de apps (API-client, modellen, thema) |
+| `api/` | OpenAPI-specificaties: het contract tussen backend en frontends |
+| `infra/` | Configuratie om KampConnect op een server te draaien |
+| `docs/` | Architectuurbeslissingen (`docs/adr`) en andere documentatie |
 
-Elke service (bv. `310-Camp`) heeft drie lagen:
+In de root staat enkel wat voor de hele repository geldt: `global.json` (versie van de .NET SDK),
+`.editorconfig`, `.gitattributes` en een algemene `.gitignore`. Een deelmap kan daarnaast een eigen
+`.gitignore` hebben, bv. `backend/.gitignore` voor Visual Studio.
 
+## Aan de slag
+
+Open `backend/KampConnect.slnx` in Visual Studio, of werk vanuit de root van de repository:
+
+```powershell
+dotnet build backend\KampConnect.slnx
+dotnet test backend\KampConnect.slnx
+.\backend\scripts\Test-Structure.ps1
 ```
-310-Camp/
-├─ 311-Data/      Entity, Context, Interface, Repository
-├─ 312-Business/  Contracts, Logic
-└─ 313-Service/   Service (ASP.NET Core Web API)
-```
 
-## Regels
-
-- Voeg projecten nooit toe via "Add New Project" in Visual Studio en versleep niets in de Solution Explorer.
-- Een nieuwe service maak je aan met:
-  ```powershell
-  .\scripts\New-Service.ps1 -Name Camp -Group 300-Kamp-Communicatie -Number 310
-  ```
-- Controleer de structuur en de afhankelijkheidsregels met:
-  ```powershell
-  .\scripts\Test-Structure.ps1
-  ```
-- Packageversies staan enkel in `Directory.Packages.props`, gedeelde projectinstellingen in `Directory.Build.props`.
-
-Geeft PowerShell een fout over de execution policy, voer dan eenmalig uit:
-`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+Alle services samen start je lokaal met de Aspire AppHost (`backend/800 - Hosting/KampConnect.Hosting.AppHost`).

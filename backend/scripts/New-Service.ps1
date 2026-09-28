@@ -8,14 +8,14 @@
     en legt de projectreferenties volgens de afhankelijkheidsregels.
 
 .EXAMPLE
-    .\scripts\New-Service.ps1 -Name Camp -Group 300-Kamp-Communicatie -Number 310
+    .\backend\scripts\New-Service.ps1 -Name Camp -Group 300-Camp-Communication -Number 310
 #>
 [CmdletBinding()]
 param(
     # Naam van de service in PascalCase, bv. Camp
     [Parameter(Mandatory)][ValidatePattern('^[A-Z][A-Za-z]+$')][string]$Name,
 
-    # Groepsmap, bv. 300-Kamp-Communicatie
+    # Groepsmap, bv. 300-Camp-Communication
     [Parameter(Mandatory)][ValidatePattern('^[1-8]00-[A-Za-z-]+$')][string]$Group,
 
     # Nummer van de service binnen de groep, een tiental, bv. 310
@@ -29,7 +29,7 @@ if ($Number % 10 -ne 0) { throw "Het servicenummer moet een tiental zijn (bv. 31
 if ([math]::Floor($Number / 100) -ne [int]$Group.Substring(0, 1)) {
     throw "Servicenummer $Number hoort niet bij groep $Group."
 }
-$groupDir = Join-Path $RepoRoot $Group
+$groupDir = Join-Path $BackendRoot $Group
 if (Test-Path $groupDir) {
     $taken = Get-ChildItem $groupDir -Directory | Where-Object { $_.Name -like "$Number-*" -or $_.Name -like "*-$Name" }
     if ($taken) { throw "Nummer $Number of naam $Name is al in gebruik: $($taken.Name -join ', ')" }
@@ -52,8 +52,8 @@ $service    = Add-KcProject -Template webapi   -Name "$p.Service"            -Di
                             -TemplateArgs '--use-controllers', '--no-openapi'
 $tests      = Add-KcProject -Template xunit    -Name "$p.Tests"              -Directory '900-Tests'
 
-$sharedContracts = Join-Path $RepoRoot '000-Shared/KampConnect.Shared.Contracts/KampConnect.Shared.Contracts.csproj'
-$serviceDefaults = Join-Path $RepoRoot '000-Shared/KampConnect.Shared.ServiceDefaults/KampConnect.Shared.ServiceDefaults.csproj'
+$sharedContracts = Join-Path $BackendRoot '000-Shared/KampConnect.Shared.Contracts/KampConnect.Shared.Contracts.csproj'
+$serviceDefaults = Join-Path $BackendRoot '000-Shared/KampConnect.Shared.ServiceDefaults/KampConnect.Shared.ServiceDefaults.csproj'
 
 # --- Referenties volgens de afhankelijkheidsregels ----------------------------
 Add-KcReference -From $context    -To $entity
@@ -65,4 +65,4 @@ Add-KcReference -From $tests      -To $logic, $contracts, $entity
 
 Write-Host ""
 Write-Host "Service '$Name' aangemaakt in $serviceDir." -ForegroundColor Green
-Write-Host "Controleer de structuur met: .\scripts\Test-Structure.ps1"
+Write-Host "Controleer de structuur met: .\backend\scripts\Test-Structure.ps1"
