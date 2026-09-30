@@ -1,3 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  </Project>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Folder Include="Constants\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Requests\" />
+  </ItemGroup>
+</Project>
