@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace KampConnect.Tenant.Business.Contracts.ClassTypes;
 
 public enum TenantStatus

@@ -1,5 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Compile Remove="NewFolder\**" />
+    <EmbeddedResource Remove="NewFolder\**" />
+    <None Remove="NewFolder\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\221-Data\KampConnect.Tenant.Data.Repository\KampConnect.Tenant.Data.Repository.csproj" />
     <ProjectReference Include="..\KampConnect.Tenant.Business.Contracts\KampConnect.Tenant.Business.Contracts.csproj" />
     <ProjectReference Include="..\..\221-Data\KampConnect.Tenant.Data.Interface\KampConnect.Tenant.Data.Interface.csproj" />
     <ProjectReference Include="..\..\221-Data\KampConnect.Tenant.Data.Entity\KampConnect.Tenant.Data.Entity.csproj" />

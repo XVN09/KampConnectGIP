@@ -2,20 +2,20 @@ namespace KampConnect.Tenant.Business.Contracts.ClassTypes;
 
 public record TenantDto(
 
-    int tenantId,
+    int TenantId,
 
-    string name,
+    string Name,
 
-    string slug,
+    string Slug,
 
-    TenantStatus status,
+    TenantStatus Status,
 
-    string primaryEmail,
+    string? PrimaryEmail,
 
-    string primaryPhone,
+    string? PrimaryPhone,
 
     DateTime CreatedAt,
 
-    DateTime UpdatedAt
+    DateTime? UpdatedAt
 
 );

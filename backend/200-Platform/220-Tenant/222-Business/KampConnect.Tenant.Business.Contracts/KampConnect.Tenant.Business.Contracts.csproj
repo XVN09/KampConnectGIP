@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <Folder Include="Constants\" />
-    <Folder Include="Interfaces\" />
   </ItemGroup>
 </Project>

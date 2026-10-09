@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\KampConnect.Tenant.Data.Interface\KampConnect.Tenant.Data.Interface.csproj" />
     <ProjectReference Include="..\KampConnect.Tenant.Data.Context\KampConnect.Tenant.Data.Context.csproj" />
