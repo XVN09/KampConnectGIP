@@ -1,4 +1,4 @@
-namespace KampConnect.Identity.Business.Contracts.Constants;
+namespace KampConnect.Shared.Contracts.Authorization;
 
 /// <summary>
 /// Namen van de claims in de tokens van KampConnect (zie api/identity-service.openapi.yaml).

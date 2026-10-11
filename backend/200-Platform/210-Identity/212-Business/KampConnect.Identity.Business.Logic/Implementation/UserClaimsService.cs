@@ -3,6 +3,7 @@ using KampConnect.Identity.Business.Contracts.ClassTypes;
 using KampConnect.Identity.Business.Contracts.Constants;
 using KampConnect.Identity.Business.Contracts.Interfaces;
 using KampConnect.Identity.Data.Interface.Repository;
+using KampConnect.Shared.Contracts.Authorization;
 
 namespace KampConnect.Identity.Business.Logic.Implementation;
 

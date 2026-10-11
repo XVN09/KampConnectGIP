@@ -13,6 +13,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using OpenIddict.Validation.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using KampConnect.Shared.Contracts.Authorization;
 
 namespace KampConnect.Identity.Service.Controllers;
 

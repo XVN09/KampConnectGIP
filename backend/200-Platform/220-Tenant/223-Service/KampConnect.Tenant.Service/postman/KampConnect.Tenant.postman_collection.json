@@ -1,0 +1,109 @@
+{
+  "info": {
+    "_postman_id": "c4e8b1d2-7a3f-4e61-9b0c-kctenantcol0001",
+    "name": "KampConnect Tenant Service",
+    3. Selecteer de environment \"KampConnect - Local\" in Postman (backend/postman).
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      { "key": "grant_type", "value": "authorization_code_with_pkce", "type": "string" },
+      { "key": "authUrl", "value": "{{identityHost}}/oauth2/authorize", "type": "string" },
+      { "key": "accessTokenUrl", "value": "{{identityHost}}/oauth2/token", "type": "string" },
+      { "key": "clientId", "value": "{{clientId}}", "type": "string" },
+      { "key": "scope", "value": "{{scope}}", "type": "string" },
+      { "key": "redirect_uri", "value": "{{callbackUrl}}", "type": "string" },
+      { "key": "challengeAlgorithm", "value": "S256", "type": "string" },
+      { "key": "addTokenTo", "value": "header", "type": "string" },
+      { "key": "client_authentication", "value": "body", "type": "string" },
+      { "key": "tokenName", "value": "KampConnect Tenant", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Tenants",
+      "item": [
+        {
+          "name": "Huidige tenant (met token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Verwacht: 200 voor een tenantgebruiker, 403 voor een platform-admin.",
+                  "pm.test('Status is 200 of 403', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Body bevat de tenantgegevens', function () {",
+                  "        const body = pm.response.json();",
+                  "        pm.expect(body).to.have.property('tenantId');",
+                  "        pm.expect(body).to.have.property('name');",
+                  "        pm.expect(body).to.have.property('status');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tenantHost}}/api/tenants/current",
+              "host": [ "{{tenantHost}}" ],
+              "path": [ "api", "tenants", "current" ]
+            },
+            "description": "Gebruikt de OAuth2-instellingen van de collectie. Klik op de collectie > tabblad Authorization > \"Get New Access Token\" en log in met de gebruiker die je wil testen (admin of tenantgebruiker). Wissel van gebruiker door opnieuw een token op te halen."
+          }
+        },
+        {
+          "name": "Huidige tenant (met bewaarde accessToken)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tenantHost}}/api/tenants/current",
+              "host": [ "{{tenantHost}}" ],
+              "path": [ "api", "tenants", "current" ]
+            },
+            "description": "Handig als je een token hebt gekopieerd (bv. uit de Identity-collectie). Plak het access token in de environment-variabele {{accessToken}}."
+          }
+        },
+        {
+          "name": "Huidige tenant (zonder token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Zonder token: 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tenantHost}}/api/tenants/current",
+              "host": [ "{{tenantHost}}" ],
+              "path": [ "api", "tenants", "current" ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

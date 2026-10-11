@@ -1,3 +1,4 @@
+using KampConnect.Shared.Contracts.Authorization;
 using KampConnect.Tenant.Data.Context.Implentation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -30,10 +31,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("TenantPolicy", policy =>
+    options.AddPolicy(AuthorizationConstants.RequiresTenantPolicy, policy =>
     {
         policy.RequireAuthenticatedUser();
-        policy.RequireClaim("scope", "tenant.read");
+        policy.RequireClaim(KampConnectClaimTypes.TenantId);
     });
 });
 

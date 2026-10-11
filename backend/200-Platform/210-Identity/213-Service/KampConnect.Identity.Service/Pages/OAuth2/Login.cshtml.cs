@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
+using KampConnect.Shared.Contracts.Authorization;
 
 namespace KampConnect.Identity.Service.Pages.OAuth2;
 

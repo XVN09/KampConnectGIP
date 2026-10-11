@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "b7a2f9d0-1c3e-4a9c-9d1a-kcidentitycol01",
     "name": "KampConnect Identity Service",
-    "description": "Testcollectie voor de KampConnect Identity Service (OAuth2/OIDC via OpenIddict + accountbeheer).\n\nVoorwaarden:\n1. Start de service met profiel \"http\" (poort 5009).\n2. Draai eenmalig de KampConnect.Identity.ClientRegistration console-app zodat clients, scopes, rollen en de testgebruiker bestaan.\n3. Selecteer de environment \"KampConnect Identity - Local\" in Postman.\n\nDe OAuth2-login-flow zelf zet je op via het tabblad Authorization van de map \"OAuth2 - Login flow\" (zie de folder-level auth hieronder) — dat kan niet volledig als losse request want er zit een browser-redirect + login-pagina tussen.",
+    "description": "Testcollectie voor de KampConnect Identity Service (OAuth2/OIDC via OpenIddict + accountbeheer).\n\nVoorwaarden:\n1. Start de service met profiel \"https\" (poort 7276).\n2. Draai eenmalig de KampConnect.Identity.ClientRegistration console-app zodat clients, scopes, rollen en de testgebruiker bestaan.\n3. Selecteer de environment \"KampConnect - Local\" in Postman.\n\nDe OAuth2-login-flow zelf zet je op via het tabblad Authorization van de map \"OAuth2 - Login flow\" (zie de folder-level auth hieronder) — dat kan niet volledig als losse request want er zit een browser-redirect + login-pagina tussen.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -15,8 +15,8 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{host}}/.well-known/openid-configuration",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/.well-known/openid-configuration",
+              "host": [ "{{identityHost}}" ],
               "path": [ ".well-known", "openid-configuration" ]
             }
           }
@@ -27,8 +27,8 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{host}}/.well-known/jwks.json",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/.well-known/jwks.json",
+              "host": [ "{{identityHost}}" ],
               "path": [ ".well-known", "jwks.json" ]
             }
           }
@@ -37,13 +37,13 @@
     },
     {
       "name": "OAuth2 - Login flow",
-      "description": "Stel hier bovenaan (tabblad Authorization van deze folder) OAuth 2.0 in met:\n- Grant Type: Authorization Code (With PKCE)\n- Auth URL: {{host}}/oauth2/authorize\n- Access Token URL: {{host}}/oauth2/token\n- Client ID: {{clientId}}\n- Client Secret: (leeg, public client)\n- Scope: {{scope}}\n- Code Challenge Method: SHA-256\n- Callback URL: {{callbackUrl}}\n\nKlik \"Get New Access Token\" -> log in met de testgebruiker (admin@kampconnect.local + wachtwoord uit user-secrets) -> token wordt automatisch in {{accessToken}} gezet via de test-script hieronder op de userinfo-request, of kopieer het handmatig.",
+      "description": "Stel hier bovenaan (tabblad Authorization van deze folder) OAuth 2.0 in met:\n- Grant Type: Authorization Code (With PKCE)\n- Auth URL: {{identityHost}}/oauth2/authorize\n- Access Token URL: {{identityHost}}/oauth2/token\n- Client ID: {{clientId}}\n- Client Secret: (leeg, public client)\n- Scope: {{scope}}\n- Code Challenge Method: SHA-256\n- Callback URL: {{callbackUrl}}\n\nKlik \"Get New Access Token\" -> log in met de testgebruiker (admin@kampconnect.local + wachtwoord uit user-secrets) -> token wordt automatisch in {{accessToken}} gezet via de test-script hieronder op de userinfo-request, of kopieer het handmatig.",
       "auth": {
         "type": "oauth2",
         "oauth2": [
           { "key": "grant_type", "value": "authorization_code_with_pkce", "type": "string" },
-          { "key": "authUrl", "value": "{{host}}/oauth2/authorize", "type": "string" },
-          { "key": "accessTokenUrl", "value": "{{host}}/oauth2/token", "type": "string" },
+          { "key": "authUrl", "value": "{{identityHost}}/oauth2/authorize", "type": "string" },
+          { "key": "accessTokenUrl", "value": "{{identityHost}}/oauth2/token", "type": "string" },
           { "key": "clientId", "value": "{{clientId}}", "type": "string" },
           { "key": "scope", "value": "{{scope}}", "type": "string" },
           { "key": "redirect_uri", "value": "{{callbackUrl}}", "type": "string" },
@@ -74,8 +74,8 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{host}}/oauth2/userinfo",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/oauth2/userinfo",
+              "host": [ "{{identityHost}}" ],
               "path": [ "oauth2", "userinfo" ]
             }
           }
@@ -90,8 +90,8 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{host}}/oauth2/userinfo",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/oauth2/userinfo",
+              "host": [ "{{identityHost}}" ],
               "path": [ "oauth2", "userinfo" ]
             }
           }
@@ -129,8 +129,8 @@
               ]
             },
             "url": {
-              "raw": "{{host}}/oauth2/token",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/oauth2/token",
+              "host": [ "{{identityHost}}" ],
               "path": [ "oauth2", "token" ]
             },
             "description": "Belangrijk: client_id moet altijd expliciet in de body staan (public client, geen secret). Vul {{refreshToken}} in de environment in (kopieer uit de vorige token-response) of gebruik eerst de OAuth2-login-flow zodat het test-script hierboven dit automatisch invult."
@@ -151,8 +151,8 @@
               ]
             },
             "url": {
-              "raw": "{{host}}/oauth2/revoke",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/oauth2/revoke",
+              "host": [ "{{identityHost}}" ],
               "path": [ "oauth2", "revoke" ]
             }
           }
@@ -183,8 +183,8 @@
               "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"invitationToken\": null\n}"
             },
             "url": {
-              "raw": "{{host}}/api/account/register",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/api/account/register",
+              "host": [ "{{identityHost}}" ],
               "path": [ "api", "account", "register" ]
             },
             "description": "De verificatiemail staat in de console-log van de service (LoggingMailSender). Kopieer het token uit de link naar de variabele emailVerificationToken."
@@ -200,8 +200,8 @@
               "raw": "{\n  \"token\": \"{{emailVerificationToken}}\"\n}"
             },
             "url": {
-              "raw": "{{host}}/api/account/verify-email",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/api/account/verify-email",
+              "host": [ "{{identityHost}}" ],
               "path": [ "api", "account", "verify-email" ]
             }
           }
@@ -216,8 +216,8 @@
               "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
             },
             "url": {
-              "raw": "{{host}}/api/account/forgot-password",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/api/account/forgot-password",
+              "host": [ "{{identityHost}}" ],
               "path": [ "api", "account", "forgot-password" ]
             },
             "description": "Geeft altijd 204 terug (ook als het e-mailadres niet bestaat). De herstelmail staat in de console-log; kopieer het token naar passwordResetToken."
@@ -233,8 +233,8 @@
               "raw": "{\n  \"token\": \"{{passwordResetToken}}\",\n  \"newPassword\": \"NogEenLangWachtwoord!\"\n}"
             },
             "url": {
-              "raw": "{{host}}/api/account/reset-password",
-              "host": [ "{{host}}" ],
+              "raw": "{{identityHost}}/api/account/reset-password",
+              "host": [ "{{identityHost}}" ],
               "path": [ "api", "account", "reset-password" ]
             }
           }

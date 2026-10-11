@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using KampConnect.Identity.Business.Contracts.Constants;
+using KampConnect.Shared.Contracts.Authorization;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
