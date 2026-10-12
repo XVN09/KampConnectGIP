@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography.X509Certificates;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using KampConnect.Shared.ServiceDefaults.Messaging;
+using KampConnect.Identity.Service.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 var isDevelopment = builder.Environment.IsDevelopment();
@@ -62,6 +64,7 @@ builder.Services.AddIdentityBusiness();  // Business.Logic   → LoginService, U
 builder.Services.AddScoped<ISessionRevoker, OpenIddictSessionRevoker>();
 // TODO: buiten Development een echte SMTP-implementatie registreren.
 builder.Services.AddSingleton<IIdentityMailSender, LoggingMailSender>();
+builder.AddKampConnectMessaging(typeof(TenantCreatedConsumer).Assembly); // MassTransit + RabbitMQ
 
 // -------------------------------------------------------------------------------------
 // 4. Web: controllers (API + OAuth-endpoints), Razor Pages (loginpagina), ProblemDetails

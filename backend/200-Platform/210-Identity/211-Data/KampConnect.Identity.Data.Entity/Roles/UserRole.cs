@@ -3,12 +3,14 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using KampConnect.Identity.Data.Entity.Users;
 using KampConnect.Shared.Logging.Config.Tools;
+using Microsoft.EntityFrameworkCore;
 
 namespace KampConnect.Identity.Data.Entity.Roles;
 
 /// <summary>
 /// Koppeling gebruiker ↔ rol binnen een tenant. tenant_id is null bij een platformrol.
 /// </summary>
+[Index(nameof(user_id), nameof(role_id), nameof(tenant_id))]
 [Table("sec_user_role", Schema = "roles")]
 public class UserRole
 {

@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/000-Shared/">
     <Project Path="000-Shared/KampConnect.Shared.Contracts/KampConnect.Shared.Contracts.csproj" />
+    <Project Path="000-Shared/KampConnect.Shared.Messaging.Contracts/KampConnect.Shared.Messaging.Contracts.csproj" Id="41c2007a-4865-4922-9fce-2cf12feb65a2" />
     <Project Path="000-Shared/KampConnect.Shared.ServiceDefaults/KampConnect.Shared.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/000-Shared/010-Templates/" />

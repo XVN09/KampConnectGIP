@@ -11,7 +11,10 @@ public enum TenantError
     SlugInUse,
 
     // Tenant niet gevonden -> 404
-    NotFound
+    NotFound,
+
+    // Tenant al in gebruik -> 409
+    NameAlreadyExists,
 }
 
 public record TenantResult(

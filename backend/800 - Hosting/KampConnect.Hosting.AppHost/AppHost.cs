@@ -1,7 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var identityService = builder.AddProject<Projects.KampConnect_Identity_Service>("identity-service");
-var tenantService = builder.AddProject<Projects.KampConnect_Tenant_Service>("tenant-service");
+var messaging = builder.AddConnectionString("messaging");
+var identityService = builder.AddProject<Projects.KampConnect_Identity_Service>("identity-service").WithReference(messaging);
+var tenantService = builder.AddProject<Projects.KampConnect_Tenant_Service>("tenant-service").WithReference(messaging);
 var userService = builder.AddProject<Projects.KampConnect_User_Service>("user-service");
 var complianceService = builder.AddProject<Projects.KampConnect_Compliance_Service>("compliance-service");
 var campService = builder.AddProject<Projects.KampConnect_Camp_Service>("camp-service");
@@ -11,6 +12,7 @@ var mediaService = builder.AddProject<Projects.KampConnect_Media_Service>("media
 var notificationService = builder.AddProject<Projects.KampConnect_Notification_Service>("notification-service");
 var billingService = builder.AddProject<Projects.KampConnect_Billing_Service>("billing-service");
 var paymentService = builder.AddProject<Projects.KampConnect_Payment_Service>("payment-service");
+
 
 builder.AddProject<Projects.KampConnect_Gateway>("gateway")
     .WithReference(identityService)
@@ -24,5 +26,7 @@ builder.AddProject<Projects.KampConnect_Gateway>("gateway")
     .WithReference(notificationService)
     .WithReference(billingService)
     .WithReference(paymentService);
+
+   
 
 builder.Build().Run();

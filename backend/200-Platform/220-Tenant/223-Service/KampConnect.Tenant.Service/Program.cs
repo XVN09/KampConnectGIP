@@ -1,4 +1,5 @@
 using KampConnect.Shared.Contracts.Authorization;
+using KampConnect.Shared.ServiceDefaults.Messaging;
 using KampConnect.Tenant.Data.Context.Implentation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,18 @@ builder.Services.AddAuthorization(options =>
         policy.RequireAuthenticatedUser();
         policy.RequireClaim(KampConnectClaimTypes.TenantId);
     });
+    options.AddPolicy(AuthorizationConstants.RequiresPlatformAdminPolicy, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim(KampConnectClaimTypes.IsPlatformAdmin, "true");
+    });
+    options.AddPolicy(AuthorizationConstants.RequiresAuthenticationPolicy, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+    });
 });
+
+builder.AddKampConnectMessaging(typeof(Program).Assembly);
 
 var app = builder.Build();
 

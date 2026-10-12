@@ -5,6 +5,10 @@
     <None Remove="NewFolder\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MassTransit.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\000-Shared\KampConnect.Shared.Messaging.Contracts\KampConnect.Shared.Messaging.Contracts.csproj" />
     <ProjectReference Include="..\..\221-Data\KampConnect.Tenant.Data.Repository\KampConnect.Tenant.Data.Repository.csproj" />
     <ProjectReference Include="..\KampConnect.Tenant.Business.Contracts\KampConnect.Tenant.Business.Contracts.csproj" />
     <ProjectReference Include="..\..\221-Data\KampConnect.Tenant.Data.Interface\KampConnect.Tenant.Data.Interface.csproj" />
