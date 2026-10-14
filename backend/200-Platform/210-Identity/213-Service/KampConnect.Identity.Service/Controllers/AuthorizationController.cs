@@ -214,7 +214,6 @@ public class AuthorizationController(
     private static string Describe(UserIdentityFailure failure) => failure switch
     {
         UserIdentityFailure.UserUnavailable => "Het account bestaat niet meer of is gedeactiveerd.",
-        UserIdentityFailure.TenantRequired => "Je hoort bij meerdere organisaties: geef tenant_id mee.",
         UserIdentityFailure.TenantNotAllowed => "Je hebt geen toegang tot deze organisatie.",
         _ => "Inloggen is niet gelukt."
     };

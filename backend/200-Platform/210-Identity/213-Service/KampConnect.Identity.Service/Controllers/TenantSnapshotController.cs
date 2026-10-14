@@ -22,7 +22,14 @@ public class TenantSnapshotController(ITenantMembershipService tenantMembershipS
 
         var tenants = await tenantMembershipService.GetTenantsForUserAsync(userId, ct);
 
-        return Ok(tenants);
+        if (!tenants.Succeeded)
+        {
+            return BadRequest(tenants.Errors);
+        }
+        else
+        {
+            return Ok(tenants.Tenants);
+        }
     }
 
 }

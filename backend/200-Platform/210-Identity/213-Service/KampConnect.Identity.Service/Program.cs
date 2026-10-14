@@ -193,6 +193,15 @@ builder.Services.AddOpenIddict()
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(builder.Configuration.GetSection("AllowedCorsOrigins").Get<string[]>() ?? [])
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 // =====================================================================================
 //  Pipeline — de volgorde is belangrijk!
@@ -205,6 +214,7 @@ if (!isDevelopment)
     app.UseHsts();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseStaticFiles();      // wwwroot (logo van de loginpagina)
 app.UseRouting();

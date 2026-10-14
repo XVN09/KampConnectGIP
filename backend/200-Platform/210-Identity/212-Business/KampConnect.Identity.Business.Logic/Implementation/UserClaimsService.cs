@@ -14,8 +14,6 @@ namespace KampConnect.Identity.Business.Logic.Implementation;
 /// <item>Een rol hoort bij een koppeling (sec_user_role) met een tenant_id — niet bij het account.</item>
 /// <item>Platformrollen (is_platform_role) hebben geen tenant.</item>
 /// <item>Vraagt de client een tenant_id (parameter in /oauth2/authorize), dan moet de gebruiker daar een rol hebben.</item>
-/// <item>Geen tenant gevraagd + maar één organisatie → die wordt automatisch gekozen.</item>
-/// <item>Geen tenant gevraagd + meerdere organisaties → fout TenantRequired (de app moet laten kiezen).</item>
 /// </list>
 /// Het resultaat bevat enkel .NET-claims; de Service-laag bepaalt in welk token (access/id) elke claim komt.
 /// </summary>
@@ -42,11 +40,6 @@ public class UserClaimsService(IUserRepository userRepository) : IUserClaimsServ
         if (tenantId is not null && !tenantIds.Contains(tenantId.Value))
         {
             return UserIdentityResult.Fail(UserIdentityFailure.TenantNotAllowed);
-        }
-        if (tenantId is null)
-        {
-            if (tenantIds.Count > 1) return UserIdentityResult.Fail(UserIdentityFailure.TenantRequired);
-            if (tenantIds.Count == 1) tenantId = tenantIds[0];
         }
 
         // De identiteit zelf. authenticationType moet ingevuld zijn, anders telt ze als "niet ingelogd".

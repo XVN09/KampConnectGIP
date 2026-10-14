@@ -8,8 +8,6 @@ public enum UserIdentityFailure
     None,
     /// <summary>Gebruiker bestaat niet (meer) of is gedeactiveerd.</summary>
     UserUnavailable,
-    /// <summary>De gebruiker hoort bij meerdere organisaties en er werd geen tenant_id meegegeven.</summary>
-    TenantRequired,
     /// <summary>De gevraagde tenant_id is niet een organisatie van deze gebruiker.</summary>
     TenantNotAllowed
 }
