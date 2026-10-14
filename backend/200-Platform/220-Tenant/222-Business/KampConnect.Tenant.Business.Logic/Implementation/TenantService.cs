@@ -59,7 +59,7 @@ public class TenantService(ITenantRepository tenantRepository, ILogger<TenantSer
             tenant_slug = request.Slug,
             primary_email = request.PrimaryEmail,
             primary_phone = request.PrimaryPhone,
-            tenant_status = "active",
+            tenant_status = TenantStatus.Active.ToString(),
             created_at = now
         };
 
@@ -72,7 +72,9 @@ public class TenantService(ITenantRepository tenantRepository, ILogger<TenantSer
         await publishEndpoint.Publish(new TenantCreated
         {
             TenantId = tenant.tenant_id,
-            CreatedByUserId = userId
+            CreatedByUserId = userId,
+            TenantName = tenant.tenant_name,
+            TenantSlug = tenant.tenant_slug
         }, ct);
 
         logger.LogInformation("Tenant created with ID {TenantId} and Slug {TenantSlug}", tenant.tenant_id, tenant.tenant_slug);

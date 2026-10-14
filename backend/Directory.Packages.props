@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="EntityFramework" Version="6.5.2" />
     <PackageVersion Include="MassTransit" Version="8.5.11" />
     <PackageVersion Include="MassTransit.Abstractions" Version="8.5.11" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.11" />

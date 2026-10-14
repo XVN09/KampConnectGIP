@@ -26,6 +26,7 @@ using System.Security.Cryptography.X509Certificates;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using KampConnect.Shared.ServiceDefaults.Messaging;
 using KampConnect.Identity.Service.Consumers;
+using KampConnect.Shared.ServiceDefaults.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 var isDevelopment = builder.Environment.IsDevelopment();

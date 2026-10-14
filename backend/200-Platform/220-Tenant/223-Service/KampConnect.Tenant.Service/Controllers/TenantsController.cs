@@ -37,19 +37,19 @@ public class TenantsController(ITenantService tenantService) : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreateTenant(TenantCreate request, CancellationToken ct)
     {
-        int userId = int.Parse(User.FindFirst(KampConnectClaimTypes.Subject)?.Value ?? "0");
+
+        if (!int.TryParse(User.FindFirst(KampConnectClaimTypes.Subject)?.Value, out int userId))
+        {
+            return Unauthorized();
+        }
 
         TenantResult tenantResult = await tenantService.CreateAsync(request, userId, ct);
 
-        if (tenantResult.Error == TenantError.SlugInUse)
+        if (!tenantResult.Succeeded)
         {
-            return Conflict(new { message = TenantError.SlugInUse });
-        }
-        if (tenantResult.Error == TenantError.NameAlreadyExists)
-        {
-            return Conflict(new { message = TenantError.NameAlreadyExists });
+            return Conflict(new { message = tenantResult.Error });
         }
 
-        return CreatedAtAction(nameof(GetCurrentTenant), new { id = tenantResult.Tenant.TenantId }, tenantResult.Tenant);
+        return Ok(tenantResult.Tenant);
     }
 }

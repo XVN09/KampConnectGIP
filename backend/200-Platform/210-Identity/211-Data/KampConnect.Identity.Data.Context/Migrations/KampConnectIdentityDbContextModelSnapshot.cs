@@ -196,6 +196,35 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.ToTable("sec_user_role", "roles");
                 });
 
+            modelBuilder.Entity("KampConnect.Identity.Data.Entity.Tenant.TenantSnapshot", b =>
+                {
+                    b.Property<int>("tenant_id")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TenantSnapshottenant_id")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("last_synced_timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("tenant_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("tenant_slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("tenant_id");
+
+                    b.HasIndex("TenantSnapshottenant_id");
+
+                    b.HasIndex("tenant_id")
+                        .IsUnique();
+
+                    b.ToTable("sec_tenant_snapshot", "roles");
+                });
+
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Users.ExternalIdentity", b =>
                 {
                     b.Property<int>("external_identity_id")
@@ -698,6 +727,13 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("KampConnect.Identity.Data.Entity.Tenant.TenantSnapshot", b =>
+                {
+                    b.HasOne("KampConnect.Identity.Data.Entity.Tenant.TenantSnapshot", null)
+                        .WithMany("TenantSnapshots")
+                        .HasForeignKey("TenantSnapshottenant_id");
+                });
+
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Users.ExternalIdentity", b =>
                 {
                     b.HasOne("KampConnect.Identity.Data.Entity.PlatformSecurity.TenantIdentityProvider", "TenantIdentityProvider")
@@ -783,6 +819,11 @@ namespace KampConnect.Identity.Data.Context.Migrations
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Roles.Role", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("KampConnect.Identity.Data.Entity.Tenant.TenantSnapshot", b =>
+                {
+                    b.Navigation("TenantSnapshots");
                 });
 
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Users.User", b =>

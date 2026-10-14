@@ -1,6 +1,8 @@
 using KampConnect.Identity.Business.Contracts.ClassTypes;
 using KampConnect.Identity.Business.Contracts.Interfaces;
 using KampConnect.Identity.Business.Contracts.Requests;
+using KampConnect.Shared.Contracts.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -16,7 +18,7 @@ namespace KampConnect.Identity.Service.Controllers;
 [ApiController]                         // automatische 400 bij onleesbare JSON + ProblemDetails
 [Route("api/account")]
 [EnableRateLimiting(RateLimitPolicies.Auth)] // beperkt het aantal pogingen per IP (zie Program.cs)
-public class AccountController(IAccountService accountService) : ControllerBase
+public class AccountController(IAccountService accountService, ITenantMembershipService tenantMembershipService) : ControllerBase
 {
     /// <summary>Account aanmaken → 201 { userId } · 400 validatie · 409 e-mail in gebruik.</summary>
     [HttpPost("register")]
@@ -54,6 +56,8 @@ public class AccountController(IAccountService accountService) : ControllerBase
         var result = await accountService.ResetPasswordAsync(request, ct);
         return result.Succeeded ? NoContent() : ToErrorResult(result);
     }
+
+    
 
     /// <summary>Zet een mislukt <see cref="AccountResult"/> om naar ProblemDetails met de juiste statuscode.</summary>
     private IActionResult ToErrorResult(AccountResult result) => result.Error switch

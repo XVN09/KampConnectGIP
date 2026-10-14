@@ -2,6 +2,7 @@ using KampConnect.Identity.Data.Entity.Claims;
 using KampConnect.Identity.Data.Entity.PlatformSecurity;
 using KampConnect.Identity.Data.Entity.Roles;
 using KampConnect.Identity.Data.Entity.Users;
+using KampConnect.Identity.Data.Entity.Tenant;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.EntityFrameworkCore.Models;
@@ -39,6 +40,9 @@ public class KampConnectIdentityDbContext(
     // Platform Security
     public DbSet<TenantIdentityProvider> TenantIdentityProviders { get; set; }
 
+    // Tenants Snapshot
+    public DbSet<TenantSnapshot> TenantSnapshots { get; set; }
+
     #endregion
 
     #region Model
@@ -68,6 +72,10 @@ public class KampConnectIdentityDbContext(
 
         // Eén externe identiteit per issuer + subject
         builder.Entity<ExternalIdentity>().HasIndex(e => new { e.issuer, e.subject }).IsUnique();
+
+        // Eén tenant snapshot per tenant
+        builder.Entity<TenantSnapshot>().HasIndex(ts => ts.tenant_id).IsUnique();
+
     }
 
     #endregion

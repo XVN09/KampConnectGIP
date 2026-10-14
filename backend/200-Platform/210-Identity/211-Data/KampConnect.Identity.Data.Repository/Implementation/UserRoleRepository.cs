@@ -17,4 +17,10 @@ public class UserRoleRepository(KampConnectIdentityDbContext dbContext) : IUserR
             ur.user_id == userId &&
             ur.role_id == roleId &&
             ur.tenant_id == tenantId, ct);
+    public Task<List<int>> GetTenantIdsByUserIdAsync(int userId, CancellationToken ct = default) =>
+        dbContext.UserRoles
+        .Where(ur => ur.user_id == userId && ur.tenant_id != null)
+        .Select(ur => ur.tenant_id!.Value)
+        .Distinct()
+        .ToListAsync(ct);
 }

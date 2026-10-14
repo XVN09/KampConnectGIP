@@ -26,6 +26,7 @@ public static class IdentityBusinessEx
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IUserClaimsService, UserClaimsService>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<ITenantMembershipService, TenantMembershipService>();
         return services;
     }
 }
