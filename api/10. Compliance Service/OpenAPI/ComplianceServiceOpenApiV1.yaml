@@ -1,0 +1,669 @@
+openapi: 3.0.0
+info:
+  title: KampConnect — Compliance Service
+  version: 1.0.0
+  description: "Verantwoording over persoonsgegevens: auditlog (append-only), toestemmingen met versie, GDPR-verzoeken\n\
+    (inzage en verwijdering) en incidenten. Verwijderen = anonimiseren, gecoördineerd via events. Database: `cpl_*`.\n\
+    \n**Algemene afspraken**\n* Alle requests lopen via de API Gateway en dragen een `Authorization: Bearer <access\
+    \ token>`.\n* De organisatie volgt uit de claim `tenant_id` in het token; ze staat daarom niet in de URL.\n\
+    \  Een token zonder `tenant_id` krijgt geen toegang tot organisatiegegevens, tenzij `is_platform_admin` aanwezig\
+    \ is.\n* Tijdstippen zijn UTC in ISO 8601. Fouten volgen RFC 7807 (Problem Details).\n"
+servers:
+- url: https://api.kampconnect.be
+  description: Productie (via de API Gateway)
+- url: https://localhost:5000
+  description: Lokaal (gateway)
+security:
+- bearerAuth: []
+tags:
+- name: Toestemmingen
+  description: Privacybeleid en toestemmingen
+- name: GDPR-verzoeken
+  description: Inzage- en verwijderverzoeken
+- name: Audit & incidenten
+  description: Auditlog en incidenten (bureau)
+paths:
+  /api/compliance/policies:
+    get:
+      tags:
+      - Toestemmingen
+      summary: Geldende beleidsdocumenten
+      security: []
+      parameters:
+      - name: language
+        in: query
+        required: false
+        schema:
+          type: string
+          example: nl
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PolicyDocument'
+  /api/compliance/consents:
+    get:
+      tags:
+      - Toestemmingen
+      summary: Toestemmingen opvragen
+      description: 'Een ouder ziet die van zichzelf en zijn kinderen.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Consent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Toestemmingen
+      summary: Toestemming geven of intrekken
+      description: 'Bv. foto''s publiceren of alleen naar huis mogen. Wordt versiegewijs bewaard.
+
+
+        **Rollen:** `guardian`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentCreate'
+      responses:
+        '201':
+          description: Geregistreerd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consent'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/compliance/requests:
+    get:
+      tags:
+      - GDPR-verzoeken
+      summary: Verzoeken opvragen
+      description: 'Een gebruiker ziet de eigen verzoeken, een beheerder die van de organisatie.
+
+
+        **Rollen:** `guardian`, `organisation_admin`'
+      parameters:
+      - &id001
+        name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 1
+      - &id002
+        name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/DataSubjectRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - GDPR-verzoeken
+      summary: Inzage of verwijdering aanvragen
+      description: 'Bij verwijdering volgt `compliance.ErasureRequested.v1`.
+
+
+        **Rollen:** `guardian`, `staff`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - requestType
+              properties:
+                requestType:
+                  type: string
+                  enum:
+                  - access
+                  - erasure
+                subjectUserId:
+                  type: string
+                  format: uuid
+                  description: Leeg = mezelf; anders een eigen kind
+      responses:
+        '202':
+          description: Ontvangen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSubjectRequest'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/compliance/requests/{requestId}:
+    get:
+      tags:
+      - GDPR-verzoeken
+      summary: Status van een verzoek
+      description: 'Toont per service of die al bevestigd heeft.
+
+
+        **Rollen:** `guardian`, `organisation_admin`'
+      parameters:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSubjectRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/compliance/requests/{requestId}/export:
+    get:
+      tags:
+      - GDPR-verzoeken
+      summary: Downloadlink van het gegevensuittreksel
+      description: 'Tijdelijke link via de Media Service.
+
+
+        **Rollen:** `guardian`'
+      parameters:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downloadUrl:
+                    type: string
+                    format: uri
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/compliance/audit-entries:
+    get:
+      tags:
+      - Audit & incidenten
+      summary: Auditlog doorzoeken
+      description: 'Alleen-lezen: het auditlog kan niet gewijzigd worden.
+
+
+        **Rollen:** `organisation_admin`'
+      parameters:
+      - name: subjectUserId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: eventName
+        in: query
+        required: false
+        schema:
+          type: string
+          example: auth.PasswordChanged.v1
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AuditEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/compliance/incidents:
+    get:
+      tags:
+      - Audit & incidenten
+      summary: Incidenten opvragen
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IncidentStatus'
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Incident'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Audit & incidenten
+      summary: Incident melden
+      description: '**Rollen:** `staff`, `organisation_admin`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentCreate'
+      responses:
+        '201':
+          description: Gemeld
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/compliance/incidents/{incidentId}:
+    patch:
+      tags:
+      - Audit & incidenten
+      summary: Incident opvolgen of afsluiten
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: incidentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/IncidentStatus'
+                resolution:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token van de Identity Service. De gateway valideert het token, de service controleert
+        tenant en rol.
+  responses:
+    ValidationError:
+      description: Validatiefout
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Geen of ongeldig access token
+    Forbidden:
+      description: Geen toegang (verkeerde rol of andere organisatie)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Niet gevonden
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Conflict met de huidige toestand
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: Foutformaat volgens RFC 7807 (standaard in ASP.NET Core)
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Page:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalCount
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 1
+        pageSize:
+          type: integer
+          format: int32
+          example: 25
+        totalCount:
+          type: integer
+          format: int32
+          example: 3
+    PolicyDocument:
+      type: object
+      properties:
+        policyDocumentId:
+          type: string
+          format: uuid
+        policyType:
+          type: string
+          enum:
+          - privacy_policy
+          - terms
+          - photo_consent
+          - go_home_alone
+        version:
+          type: integer
+          format: int32
+          example: 3
+        language:
+          type: string
+          example: nl
+        url:
+          type: string
+          format: uri
+        publishedAt:
+          type: string
+          format: date-time
+    ConsentCreate:
+      type: object
+      required:
+      - policyDocumentId
+      - action
+      properties:
+        policyDocumentId:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum:
+          - given
+          - withdrawn
+        userId:
+          type: string
+          format: uuid
+          description: Leeg = mezelf; anders een eigen kind
+    Consent:
+      type: object
+      properties:
+        consentRecordId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        policyDocumentId:
+          type: string
+          format: uuid
+        policyType:
+          type: string
+        version:
+          type: integer
+          format: int32
+        action:
+          type: string
+          enum:
+          - given
+          - withdrawn
+        givenByUserId:
+          type: string
+          format: uuid
+        occurredAt:
+          type: string
+          format: date-time
+    DataSubjectRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        requestType:
+          type: string
+          enum:
+          - access
+          - erasure
+        status:
+          type: string
+          enum:
+          - received
+          - in_progress
+          - completed
+          - rejected
+        subjectUserId:
+          type: string
+          format: uuid
+        receivedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+          description: 'Wettelijke termijn: 1 maand'
+        completedAt:
+          type: string
+          format: date-time
+        tasks:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceName:
+                type: string
+                example: messaging
+              status:
+                type: string
+                enum:
+                - pending
+                - done
+                - failed
+              completedAt:
+                type: string
+                format: date-time
+    AuditEntry:
+      type: object
+      properties:
+        auditEntryId:
+          type: string
+          format: uuid
+        eventName:
+          type: string
+        actorUserId:
+          type: string
+          format: uuid
+        subjectUserId:
+          type: string
+          format: uuid
+        resourceType:
+          type: string
+        resourceId:
+          type: string
+          format: uuid
+        occurredAt:
+          type: string
+          format: date-time
+    IncidentStatus:
+      type: string
+      enum:
+      - open
+      - investigating
+      - resolved
+    IncidentCreate:
+      type: object
+      required:
+      - incidentType
+      - severity
+      - description
+      properties:
+        incidentType:
+          type: string
+          enum:
+          - safety
+          - data_breach
+          - misconduct
+          - other
+        severity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 4
+        subjectUserId:
+          type: string
+          format: uuid
+        description:
+          type: string
+    Incident:
+      allOf:
+      - type: object
+        properties:
+          incidentId:
+            type: string
+            format: uuid
+          status:
+            $ref: '#/components/schemas/IncidentStatus'
+          openedAt:
+            type: string
+            format: date-time
+          resolvedAt:
+            type: string
+            format: date-time
+          resolution:
+            type: string
+      - $ref: '#/components/schemas/IncidentCreate'

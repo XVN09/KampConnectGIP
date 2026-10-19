@@ -1,0 +1,488 @@
+openapi: 3.0.0
+info:
+  title: KampConnect — Calling Service
+  version: 1.0.0
+  description: "Spraak- en video-oproepen via WebRTC. De service vervoert zelf **geen** audio of video: ze regelt\
+    \ het opzetten van de\nverbinding (signaling) en deelt tijdelijke TURN-credentials uit. Database: `cal_*`.\n\
+    \nSignaling loopt via de **SignalR-hub** `wss://api.kampconnect.be/hubs/calls`:\n\n| Hub-methode (client → server)\
+    \ | Hub-event (server → client) |\n|---|---|\n| `SendOffer(callId, sdp)` | `OfferReceived(callId, sdp)` |\n\
+    | `SendAnswer(callId, sdp)` | `AnswerReceived(callId, sdp)` |\n| `SendIceCandidate(callId, candidate)` | `IceCandidateReceived(callId,\
+    \ candidate)` |\n| | `CallStateChanged(callId, status)` |\n\nBelrechten worden vooraf opgebouwd uit de `camp.*`-events.\
+    \ Gesprekken worden niet opgenomen; enkel metadata.\n\n**Algemene afspraken**\n* Alle requests lopen via de\
+    \ API Gateway en dragen een `Authorization: Bearer <access token>`.\n* De organisatie volgt uit de claim `tenant_id`\
+    \ in het token; ze staat daarom niet in de URL.\n  Een token zonder `tenant_id` krijgt geen toegang tot organisatiegegevens,\
+    \ tenzij `is_platform_admin` aanwezig is.\n* Tijdstippen zijn UTC in ISO 8601. Fouten volgen RFC 7807 (Problem\
+    \ Details).\n"
+servers:
+- url: https://api.kampconnect.be
+  description: Productie (via de API Gateway)
+- url: https://localhost:5000
+  description: Lokaal (gateway)
+security:
+- bearerAuth: []
+tags:
+- name: Oproepen
+  description: Levenscyclus en historiek van oproepen
+- name: TURN
+  description: Tijdelijke credentials voor de TURN-server
+paths:
+  /api/calls:
+    get:
+      tags:
+      - Oproepen
+      summary: Oproepgeschiedenis
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Call'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Oproepen
+      summary: Oproep starten
+      description: 'Controleert de lokale belrechten. Het antwoord bevat meteen TURN-credentials. Publiceert `calling.CallInitiated.v1`
+        (of `calling.EmergencyCallPlaced.v1`).
+
+
+        **Rollen:** `guardian`, `staff`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallCreate'
+      responses:
+        '201':
+          description: Oproep gestart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallStarted'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/calls/{callId}:
+    get:
+      tags:
+      - Oproepen
+      summary: Oproep opvragen
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: callId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Call'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/calls/{callId}/answer:
+    post:
+      tags:
+      - Oproepen
+      summary: Opnemen
+      description: 'Publiceert `calling.CallAnswered.v1`.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: callId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallStarted'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/calls/{callId}/decline:
+    post:
+      tags:
+      - Oproepen
+      summary: Weigeren
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: callId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/calls/{callId}/end:
+    post:
+      tags:
+      - Oproepen
+      summary: Ophangen
+      description: 'Publiceert `calling.CallEnded.v1`.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: callId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endReason:
+                  type: string
+                  enum:
+                  - hangup
+                  - network_error
+                  - timeout
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Call'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/calls/{callId}/quality-samples:
+    post:
+      tags:
+      - Oproepen
+      summary: Kwaliteitsmeting doorgeven
+      description: 'Wordt periodiek door de app verstuurd tijdens een gesprek.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: callId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - roundTripMs
+              - jitterMs
+              - packetLossPct
+              properties:
+                roundTripMs:
+                  type: integer
+                  format: int32
+                jitterMs:
+                  type: integer
+                  format: int32
+                packetLossPct:
+                  type: number
+                  example: 1.5
+      responses:
+        '204':
+          description: Opgeslagen
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/turn-credentials:
+    post:
+      tags:
+      - TURN
+      summary: TURN-credentials opvragen
+      description: 'Enkel voor een lopende oproep. Enkele uren geldig.
+
+
+        **Rollen:** `guardian`, `staff`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - callId
+              properties:
+                callId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TurnCredentials'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token van de Identity Service. De gateway valideert het token, de service controleert
+        tenant en rol.
+  responses:
+    ValidationError:
+      description: Validatiefout
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Geen of ongeldig access token
+    Forbidden:
+      description: Geen toegang (verkeerde rol of andere organisatie)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Niet gevonden
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Conflict met de huidige toestand
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: Foutformaat volgens RFC 7807 (standaard in ASP.NET Core)
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Page:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalCount
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 1
+        pageSize:
+          type: integer
+          format: int32
+          example: 25
+        totalCount:
+          type: integer
+          format: int32
+          example: 3
+    CallStatus:
+      type: string
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - declined
+      - missed
+      - ended
+      - forwarded
+    CallCreate:
+      type: object
+      required:
+      - calleeUserId
+      - callType
+      properties:
+        calleeUserId:
+          type: string
+          format: uuid
+        campId:
+          type: string
+          format: uuid
+        callType:
+          type: string
+          enum:
+          - audio
+          - video
+        isEmergency:
+          type: boolean
+          default: false
+          description: Verhoogde prioriteit, wordt doorgeschakeld naar het bureau
+    Call:
+      type: object
+      properties:
+        callId:
+          type: string
+          format: uuid
+        callerUserId:
+          type: string
+          format: uuid
+        calleeUserId:
+          type: string
+          format: uuid
+        campId:
+          type: string
+          format: uuid
+        callType:
+          type: string
+          enum:
+          - audio
+          - video
+        status:
+          $ref: '#/components/schemas/CallStatus'
+        isEmergency:
+          type: boolean
+        connectionType:
+          type: string
+          enum:
+          - direct
+          - relay
+        initiatedAt:
+          type: string
+          format: date-time
+        answeredAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+        durationSeconds:
+          type: integer
+          format: int32
+        endReason:
+          type: string
+    CallStarted:
+      type: object
+      properties:
+        call:
+          $ref: '#/components/schemas/Call'
+        iceServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/IceServer'
+    TurnCredentials:
+      type: object
+      properties:
+        iceServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/IceServer'
+        expiresAt:
+          type: string
+          format: date-time
+    IceServer:
+      type: object
+      required:
+      - urls
+      properties:
+        urls:
+          type: array
+          items:
+            type: string
+            example: turns:turn.kampconnect.be:443?transport=tcp
+        username:
+          type: string
+          example: '1790180000:58'
+        credential:
+          type: string

@@ -1,0 +1,481 @@
+openapi: 3.0.0
+info:
+  title: KampConnect — Billing Service
+  version: 1.0.0
+  description: "Wat een organisatie aan KampConnect verschuldigd is: formules, abonnement, verbruik en facturen.\n\
+    Billing int zelf geen geld (dat doet Payment). Bedragen staan in **centen** met een valuta. Database: `bil_*`.\n\
+    \n**Algemene afspraken**\n* Alle requests lopen via de API Gateway en dragen een `Authorization: Bearer <access\
+    \ token>`.\n* De organisatie volgt uit de claim `tenant_id` in het token; ze staat daarom niet in de URL.\n\
+    \  Een token zonder `tenant_id` krijgt geen toegang tot organisatiegegevens, tenzij `is_platform_admin` aanwezig\
+    \ is.\n* Tijdstippen zijn UTC in ISO 8601. Fouten volgen RFC 7807 (Problem Details).\n"
+servers:
+- url: https://api.kampconnect.be
+  description: Productie (via de API Gateway)
+- url: https://localhost:5000
+  description: Lokaal (gateway)
+security:
+- bearerAuth: []
+tags:
+- name: Abonnement
+  description: Formules, abonnement en verbruik
+- name: Facturen
+  description: Facturen en creditnota's
+paths:
+  /api/billing/plans:
+    get:
+      tags:
+      - Abonnement
+      summary: Beschikbare formules
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+  /api/billing/subscription:
+    get:
+      tags:
+      - Abonnement
+      summary: Huidig abonnement
+      description: '**Rollen:** `organisation_admin`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/billing/subscription/change:
+    post:
+      tags:
+      - Abonnement
+      summary: Van formule wisselen
+      description: 'Gaat in bij de volgende periode.
+
+
+        **Rollen:** `organisation_admin`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - planCode
+              properties:
+                planCode:
+                  type: string
+                  example: standard
+      responses:
+        '202':
+          description: Ingepland
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/billing/usage:
+    get:
+      tags:
+      - Abonnement
+      summary: Verbruik in de huidige periode
+      description: '**Rollen:** `organisation_admin`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Usage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/billing/invoices:
+    get:
+      tags:
+      - Facturen
+      summary: Facturen opvragen
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/InvoiceStatus'
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Invoice'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/billing/invoices/{invoiceId}:
+    get:
+      tags:
+      - Facturen
+      summary: Factuur met lijnen
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/billing/invoices/{invoiceId}/pdf:
+    get:
+      tags:
+      - Facturen
+      summary: Factuur als PDF
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: PDF-bestand
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/billing/invoices/{invoiceId}/credit-notes:
+    post:
+      tags:
+      - Facturen
+      summary: Creditnota maken
+      description: 'Een verstuurde factuur wijzigt nooit; correcties gebeuren met een creditnota.
+
+
+        **Rollen:** `platform_admin`'
+      parameters:
+      - name: invoiceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - reason
+              - amountCents
+              properties:
+                reason:
+                  type: string
+                amountCents:
+                  type: integer
+                  format: int64
+      responses:
+        '201':
+          description: Aangemaakt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token van de Identity Service. De gateway valideert het token, de service controleert
+        tenant en rol.
+  responses:
+    ValidationError:
+      description: Validatiefout
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Geen of ongeldig access token
+    Forbidden:
+      description: Geen toegang (verkeerde rol of andere organisatie)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Niet gevonden
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Conflict met de huidige toestand
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: Foutformaat volgens RFC 7807 (standaard in ASP.NET Core)
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Page:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalCount
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 1
+        pageSize:
+          type: integer
+          format: int32
+          example: 25
+        totalCount:
+          type: integer
+          format: int32
+          example: 3
+    Plan:
+      type: object
+      properties:
+        code:
+          type: string
+          example: standard
+        name:
+          type: string
+          example: Standaard
+        billingInterval:
+          type: string
+          enum:
+          - monthly
+          - yearly
+        priceCents:
+          type: integer
+          format: int64
+          example: 4900
+        currency:
+          type: string
+          example: EUR
+        limits:
+          type: array
+          items:
+            type: object
+            properties:
+              metric:
+                $ref: '#/components/schemas/Metric'
+              includedQuantity:
+                type: integer
+                format: int64
+              overageUnitPriceCents:
+                type: integer
+                format: int64
+    Metric:
+      type: string
+      enum:
+      - camps
+      - users
+      - storage_bytes
+    Subscription:
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          format: uuid
+        plan:
+          $ref: '#/components/schemas/Plan'
+        status:
+          type: string
+          enum:
+          - trialing
+          - active
+          - past_due
+          - cancelled
+        currentPeriodStart:
+          type: string
+          format: date-time
+        currentPeriodEnd:
+          type: string
+          format: date-time
+        trialEndsAt:
+          type: string
+          format: date-time
+        cancelAt:
+          type: string
+          format: date-time
+    Usage:
+      type: object
+      properties:
+        metric:
+          $ref: '#/components/schemas/Metric'
+        quantity:
+          type: integer
+          format: int64
+        includedQuantity:
+          type: integer
+          format: int64
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+    InvoiceStatus:
+      type: string
+      enum:
+      - draft
+      - open
+      - paid
+      - overdue
+      - void
+    Invoice:
+      type: object
+      properties:
+        invoiceId:
+          type: string
+          format: uuid
+        invoiceNumber:
+          type: string
+          example: 2027-00042
+        documentType:
+          type: string
+          enum:
+          - invoice
+          - credit_note
+        status:
+          $ref: '#/components/schemas/InvoiceStatus'
+        currency:
+          type: string
+          example: EUR
+        subtotalCents:
+          type: integer
+          format: int64
+        vatCents:
+          type: integer
+          format: int64
+        totalCents:
+          type: integer
+          format: int64
+          example: 5929
+        issuedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+    InvoiceDetail:
+      allOf:
+      - $ref: '#/components/schemas/Invoice'
+      - type: object
+        properties:
+          lines:
+            type: array
+            items:
+              type: object
+              properties:
+                description:
+                  type: string
+                quantity:
+                  type: number
+                unitPriceCents:
+                  type: integer
+                  format: int64
+                vatRate:
+                  type: number
+                  example: 21
+                lineTotalCents:
+                  type: integer
+                  format: int64

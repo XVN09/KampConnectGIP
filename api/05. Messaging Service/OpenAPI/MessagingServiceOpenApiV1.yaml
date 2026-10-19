@@ -1,0 +1,731 @@
+openapi: 3.0.0
+info:
+  title: KampConnect — Messaging Service
+  version: 1.0.0
+  description: "Chat tussen ouders, kinderen en leiding. Realtime verkeer loopt via de **SignalR-hub** `wss://api.kampconnect.be/hubs/chat`;\n\
+    deze REST-API dient voor historiek, gesprekken openen en moderatie. Database: `msg_*`.\n\n| Hub-methode (client\
+    \ → server) | Hub-event (server → client) |\n|---|---|\n| `SendMessage(conversationId, body, attachmentFileIds)`\
+    \ | `MessageReceived(message)` |\n| `StartTyping(conversationId)` | `UserTyping(conversationId, userId)` |\n\
+    | `MarkRead(conversationId, messageId)` | `MessageRead(conversationId, userId, messageId)` |\n| | `PresenceChanged(userId,\
+    \ isOnline, lastSeenAt)` |\n\nWie in welk gesprek mag, volgt uit de `camp.*`-events (eigen deelnemerstabel,\
+    \ geen call naar Camp).\nBerichten worden nooit hard verwijderd.\n\n**Algemene afspraken**\n* Alle requests\
+    \ lopen via de API Gateway en dragen een `Authorization: Bearer <access token>`.\n* De organisatie volgt uit\
+    \ de claim `tenant_id` in het token; ze staat daarom niet in de URL.\n  Een token zonder `tenant_id` krijgt\
+    \ geen toegang tot organisatiegegevens, tenzij `is_platform_admin` aanwezig is.\n* Tijdstippen zijn UTC in ISO\
+    \ 8601. Fouten volgen RFC 7807 (Problem Details).\n"
+servers:
+- url: https://api.kampconnect.be
+  description: Productie (via de API Gateway)
+- url: https://localhost:5000
+  description: Lokaal (gateway)
+security:
+- bearerAuth: []
+tags:
+- name: Gesprekken
+  description: Gesprekken en deelnemers
+- name: Berichten
+  description: Berichten lezen en versturen
+- name: Moderatie
+  description: Melden en beoordelen van berichten
+paths:
+  /api/conversations:
+    get:
+      tags:
+      - Gesprekken
+      summary: Mijn gesprekken
+      description: 'Gesorteerd op laatste bericht (recentste eerst).
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: campId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - &id001
+        name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 1
+      - &id002
+        name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Conversation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Gesprekken
+      summary: 1-op-1-gesprek starten
+      description: 'Enkel met iemand binnen hetzelfde kamp. Bestaat het gesprek al, dan komt dat terug.
+
+
+        **Rollen:** `guardian`, `staff`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userId
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Aangemaakt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/conversations/{conversationId}:
+    get:
+      tags:
+      - Gesprekken
+      summary: Gesprek opvragen
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/conversations/{conversationId}/mute:
+    put:
+      tags:
+      - Gesprekken
+      summary: Gesprek dempen of niet
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - isMuted
+              properties:
+                isMuted:
+                  type: boolean
+      responses:
+        '204':
+          description: Gewijzigd
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/conversations/{conversationId}/messages:
+    get:
+      tags:
+      - Berichten
+      summary: Berichten ophalen
+      description: 'Cursor-paginering: geef `before` mee om oudere berichten te laden.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: before
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+        description: Bericht-ID
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Zoeken in de tekst
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 50
+          maximum: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Berichten
+      summary: Bericht versturen (REST-alternatief voor de hub)
+      description: 'Publiceert `messaging.MessageSent.v1`.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCreate'
+      responses:
+        '201':
+          description: Verstuurd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/conversations/{conversationId}/read:
+    post:
+      tags:
+      - Berichten
+      summary: Gelezen tot en met een bericht
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - messageId
+              properties:
+                messageId:
+                  type: string
+                  format: uuid
+      responses:
+        '204':
+          description: OK
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/messages/{messageId}:
+    patch:
+      tags:
+      - Berichten
+      summary: Eigen bericht bewerken
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - body
+              properties:
+                body:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags:
+      - Berichten
+      summary: Bericht verwijderen
+      description: 'Zacht verwijderd (`is_deleted`). Publiceert `messaging.MessageDeleted.v1`.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Verwijderd
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/camps/{campId}/announcements:
+    post:
+      tags:
+      - Berichten
+      summary: Aankondiging naar alle ouders van een kamp
+      description: 'Publiceert `messaging.AnnouncementPublished.v1`.
+
+
+        **Rollen:** `organisation_admin`, `staff`'
+      parameters:
+      - name: campId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - title
+              - body
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                groupId:
+                  type: string
+                  format: uuid
+                  description: 'Optioneel: enkel één groep'
+      responses:
+        '201':
+          description: Verstuurd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/messages/{messageId}/flags:
+    post:
+      tags:
+      - Moderatie
+      summary: Bericht melden
+      description: 'Publiceert `messaging.MessageFlagged.v1`.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - reason
+              properties:
+                reason:
+                  type: string
+                  maxLength: 200
+      responses:
+        '201':
+          description: Gemeld
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/moderation/flags:
+    get:
+      tags:
+      - Moderatie
+      summary: Meldingen opvragen
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/FlagStatus'
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Flag'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/moderation/flags/{flagId}:
+    patch:
+      tags:
+      - Moderatie
+      summary: Melding beoordelen
+      description: '`hidden` verbergt het bericht voor iedereen.
+
+
+        **Rollen:** `organisation_admin`'
+      parameters:
+      - name: flagId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - status
+              properties:
+                status:
+                  $ref: '#/components/schemas/FlagStatus'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token van de Identity Service. De gateway valideert het token, de service controleert
+        tenant en rol.
+  responses:
+    ValidationError:
+      description: Validatiefout
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Geen of ongeldig access token
+    Forbidden:
+      description: Geen toegang (verkeerde rol of andere organisatie)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Niet gevonden
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Conflict met de huidige toestand
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: Foutformaat volgens RFC 7807 (standaard in ASP.NET Core)
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Page:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalCount
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 1
+        pageSize:
+          type: integer
+          format: int32
+          example: 25
+        totalCount:
+          type: integer
+          format: int32
+          example: 3
+    Conversation:
+      type: object
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        conversationType:
+          type: string
+          enum:
+          - direct
+          - group
+          - announcement
+        campId:
+          type: string
+          format: uuid
+        groupId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+        lastMessage:
+          $ref: '#/components/schemas/Message'
+        unreadCount:
+          type: integer
+          format: int32
+          example: 2
+        isMuted:
+          type: boolean
+        isArchived:
+          type: boolean
+    Participant:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        avatarFileId:
+          type: string
+          format: uuid
+        lastSeenAt:
+          type: string
+          format: date-time
+    MessageCreate:
+      type: object
+      required:
+      - body
+      properties:
+        body:
+          type: string
+          maxLength: 4000
+        attachmentFileIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+            description: Eerst opladen via de Media Service
+    Message:
+      type: object
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        senderUserId:
+          type: string
+          format: uuid
+        body:
+          type: string
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              fileId:
+                type: string
+                format: uuid
+              fileName:
+                type: string
+              contentType:
+                type: string
+              sizeBytes:
+                type: integer
+                format: int64
+        sentAt:
+          type: string
+          format: date-time
+        editedAt:
+          type: string
+          format: date-time
+        isDeleted:
+          type: boolean
+    FlagStatus:
+      type: string
+      enum:
+      - open
+      - dismissed
+      - hidden
+    Flag:
+      type: object
+      properties:
+        flagId:
+          type: string
+          format: uuid
+        messageId:
+          type: string
+          format: uuid
+        reportedByUserId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        status:
+          $ref: '#/components/schemas/FlagStatus'
+        createdAt:
+          type: string
+          format: date-time
+        reviewedAt:
+          type: string
+          format: date-time

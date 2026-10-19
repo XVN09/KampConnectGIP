@@ -1,0 +1,785 @@
+openapi: 3.0.0
+info:
+  title: KampConnect — Tenant Service
+  version: 1.0.0
+  description: "Beheert de organisaties (tenants) die KampConnect gebruiken: gegevens, instellingen, domeinen,\n\
+    functies en wie er lid is. Database: `tnt_*` (PostgreSQL).\n\n**Algemene afspraken**\n* Alle requests lopen\
+    \ via de API Gateway en dragen een `Authorization: Bearer <access token>`.\n* De organisatie volgt uit de claim\
+    \ `tenant_id` in het token; ze staat daarom niet in de URL.\n  Een token zonder `tenant_id` krijgt geen toegang\
+    \ tot organisatiegegevens, tenzij `is_platform_admin` aanwezig is.\n* Tijdstippen zijn UTC in ISO 8601. Fouten\
+    \ volgen RFC 7807 (Problem Details).\n"
+servers:
+- url: https://api.kampconnect.be
+  description: Productie (via de API Gateway)
+- url: https://localhost:5000
+  description: Lokaal (gateway)
+security:
+- bearerAuth: []
+tags:
+- name: Organisatie
+  description: De eigen organisatie van de ingelogde gebruiker
+- name: Leden & uitnodigingen
+  description: Lidmaatschappen en uitnodigingen
+- name: Platformbeheer
+  description: Enkel voor beheerders van KampConnect (`is_platform_admin`)
+paths:
+  /api/tenants:
+    get:
+      tags:
+      - Platformbeheer
+      summary: Alle organisaties opvragen
+      description: '**Rollen:** `platform_admin`'
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/TenantStatus'
+      - &id001
+        name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 1
+      - &id002
+        name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Tenant'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Platformbeheer
+      summary: Organisatie aanmaken
+      description: 'Publiceert `tenant.TenantCreated.v1`.
+
+
+        **Rollen:** `platform_admin`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreate'
+      responses:
+        '201':
+          description: Aangemaakt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/{tenantId}/status:
+    put:
+      tags:
+      - Platformbeheer
+      summary: Organisatie opschorten of heractiveren
+      description: 'Bij `suspended` wordt `tenant.TenantSuspended.v1` gepubliceerd.
+
+
+        **Rollen:** `platform_admin`'
+      parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - status
+              properties:
+                status:
+                  $ref: '#/components/schemas/TenantStatus'
+                reason:
+                  type: string
+      responses:
+        '204':
+          description: Gewijzigd
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/{tenantId}/features/{featureKey}:
+    put:
+      tags:
+      - Platformbeheer
+      summary: Functie aan- of uitzetten
+      description: '**Rollen:** `platform_admin`'
+      parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: featureKey
+        in: path
+        required: true
+        schema:
+          type: string
+          example: emergency_calling
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - isEnabled
+              properties:
+                isEnabled:
+                  type: boolean
+      responses:
+        '204':
+          description: Gewijzigd
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current:
+    get:
+      tags:
+      - Organisatie
+      summary: Mijn organisatie opvragen
+      description: '**Rollen:** `guardian`, `staff`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    patch:
+      tags:
+      - Organisatie
+      summary: Organisatiegegevens wijzigen
+      description: '**Rollen:** `organisation_admin`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantUpdate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/settings:
+    get:
+      tags:
+      - Organisatie
+      summary: Instellingen opvragen
+      description: '**Rollen:** `staff`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags:
+      - Organisatie
+      summary: Instellingen wijzigen
+      description: 'Publiceert `tenant.SettingsUpdated.v1`.
+
+
+        **Rollen:** `organisation_admin`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantSettings'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSettings'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/features:
+    get:
+      tags:
+      - Organisatie
+      summary: Actieve functies opvragen
+      description: '**Rollen:** `guardian`, `staff`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feature'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/domains:
+    get:
+      tags:
+      - Organisatie
+      summary: Domeinen opvragen
+      description: '**Rollen:** `organisation_admin`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Domain'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Organisatie
+      summary: Domein toevoegen
+      description: 'Het domein moet daarna geverifieerd worden (DNS TXT-record).
+
+
+        **Rollen:** `organisation_admin`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - domain
+              properties:
+                domain:
+                  type: string
+                  example: chiro-heist.be
+      responses:
+        '201':
+          description: Toegevoegd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Domain'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/domains/{domainId}:
+    delete:
+      tags:
+      - Organisatie
+      summary: Domein verwijderen
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: domainId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '204':
+          description: Verwijderd
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/members:
+    get:
+      tags:
+      - Leden & uitnodigingen
+      summary: Leden opvragen
+      description: '**Rollen:** `staff`'
+      parameters:
+      - name: role
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/RoleKey'
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                  properties:
+                    items:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Membership'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/members/{membershipId}:
+    patch:
+      tags:
+      - Leden & uitnodigingen
+      summary: Rol of status van een lid wijzigen
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: membershipId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleKey:
+                  $ref: '#/components/schemas/RoleKey'
+                status:
+                  $ref: '#/components/schemas/MembershipStatus'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags:
+      - Leden & uitnodigingen
+      summary: Lid verwijderen uit de organisatie
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: membershipId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '204':
+          description: Verwijderd
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/invitations:
+    get:
+      tags:
+      - Leden & uitnodigingen
+      summary: Openstaande uitnodigingen
+      description: '**Rollen:** `organisation_admin`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Leden & uitnodigingen
+      summary: Iemand uitnodigen
+      description: 'De uitnodigingslink bepaalt de rol. Publiceert `tenant.InvitationSent.v1`; Notification verstuurt
+        de mail.
+
+
+        **Rollen:** `organisation_admin`'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationCreate'
+      responses:
+        '201':
+          description: Verstuurd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/tenants/current/invitations/{invitationId}:
+    delete:
+      tags:
+      - Leden & uitnodigingen
+      summary: Uitnodiging intrekken
+      description: '**Rollen:** `organisation_admin`'
+      parameters:
+      - name: invitationId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '204':
+          description: Ingetrokken
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/invitations/{token}:
+    get:
+      tags:
+      - Leden & uitnodigingen
+      summary: Uitnodiging bekijken (publiek)
+      description: Toont naam van de organisatie en de rol vóór de registratie. Het token gaat daarna mee naar `POST
+        /api/account/register` van de Identity Service.
+      security: []
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationPreview'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token van de Identity Service. De gateway valideert het token, de service controleert
+        tenant en rol.
+  responses:
+    ValidationError:
+      description: Validatiefout
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Geen of ongeldig access token
+    Forbidden:
+      description: Geen toegang (verkeerde rol of andere organisatie)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Niet gevonden
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Conflict met de huidige toestand
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: Foutformaat volgens RFC 7807 (standaard in ASP.NET Core)
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Page:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalCount
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 1
+        pageSize:
+          type: integer
+          format: int32
+          example: 25
+        totalCount:
+          type: integer
+          format: int32
+          example: 3
+    TenantStatus:
+      type: string
+      enum:
+      - onboarding
+      - active
+      - suspended
+      - closed
+    RoleKey:
+      type: string
+      enum:
+      - organisation_admin
+      - staff
+      - guardian
+    MembershipStatus:
+      type: string
+      enum:
+      - active
+      - inactive
+    Tenant:
+      type: object
+      required:
+      - tenantId
+      - name
+      - slug
+      - status
+      properties:
+        tenantId:
+          type: integer
+          format: int32
+          example: 12
+        name:
+          type: string
+          example: Chiro Heist
+        slug:
+          type: string
+          example: chiro-heist
+          description: 'Subdomein: `chiro-heist.kampconnect.be`'
+        status:
+          $ref: '#/components/schemas/TenantStatus'
+        primaryEmail:
+          type: string
+          format: email
+        primaryPhone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    TenantCreate:
+      type: object
+      required:
+      - name
+      - slug
+      - primaryEmail
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+          pattern: ^[a-z0-9-]{3,80}$
+        primaryEmail:
+          type: string
+          format: email
+        primaryPhone:
+          type: string
+    TenantUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        primaryEmail:
+          type: string
+          format: email
+        primaryPhone:
+          type: string
+    TenantSettings:
+      type: object
+      properties:
+        timezone:
+          type: string
+          example: Europe/Brussels
+        emergencyCallingEnabled:
+          type: boolean
+        dataRetentionDays:
+          type: integer
+          format: int32
+          example: 365
+    Feature:
+      type: object
+      properties:
+        featureKey:
+          type: string
+          example: emergency_calling
+        isEnabled:
+          type: boolean
+    Domain:
+      type: object
+      properties:
+        domainId:
+          type: integer
+          format: int32
+        domain:
+          type: string
+          example: chiro-heist.be
+        isVerified:
+          type: boolean
+        verificationRecord:
+          type: string
+          description: TXT-record om toe te voegen
+    Membership:
+      type: object
+      properties:
+        membershipId:
+          type: integer
+          format: int32
+        userId:
+          type: integer
+          format: int32
+          description: ID uit de Identity Service
+        roleKey:
+          $ref: '#/components/schemas/RoleKey'
+        status:
+          $ref: '#/components/schemas/MembershipStatus'
+        createdAt:
+          type: string
+          format: date-time
+    InvitationCreate:
+      type: object
+      required:
+      - email
+      - roleKey
+      properties:
+        email:
+          type: string
+          format: email
+        roleKey:
+          $ref: '#/components/schemas/RoleKey'
+    Invitation:
+      type: object
+      properties:
+        invitationId:
+          type: integer
+          format: int32
+        email:
+          type: string
+          format: email
+        roleKey:
+          $ref: '#/components/schemas/RoleKey'
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    InvitationPreview:
+      type: object
+      properties:
+        tenantName:
+          type: string
+        roleKey:
+          $ref: '#/components/schemas/RoleKey'
+        expiresAt:
+          type: string
+          format: date-time

@@ -1,0 +1,300 @@
+openapi: 3.0.0
+info:
+  title: KampConnect — Media Service
+  version: 1.0.0
+  description: "Bewaart en levert bestanden: profielfoto's, bijlagen en kampfoto's. Bestanden staan in privé-objectopslag;\n\
+    downloaden kan enkel via een **tijdelijke, ondertekende link**. Het type wordt op de inhoud gecontroleerd,\n\
+    niet op de extensie. Eerst opladen, daarna koppelt de andere service het bestand. Database: `med_*`.\n\n**Algemene\
+    \ afspraken**\n* Alle requests lopen via de API Gateway en dragen een `Authorization: Bearer <access token>`.\n\
+    * De organisatie volgt uit de claim `tenant_id` in het token; ze staat daarom niet in de URL.\n  Een token zonder\
+    \ `tenant_id` krijgt geen toegang tot organisatiegegevens, tenzij `is_platform_admin` aanwezig is.\n* Tijdstippen\
+    \ zijn UTC in ISO 8601. Fouten volgen RFC 7807 (Problem Details).\n"
+servers:
+- url: https://api.kampconnect.be
+  description: Productie (via de API Gateway)
+- url: https://localhost:5000
+  description: Lokaal (gateway)
+security:
+- bearerAuth: []
+tags:
+- name: Bestanden
+  description: Opladen, opvragen en downloaden
+paths:
+  /api/files:
+    post:
+      tags:
+      - Bestanden
+      summary: Bestand opladen
+      description: 'Toegelaten: JPEG, PNG, HEIC, PDF — max. 20 MB. Niet-gekoppelde bestanden worden na 24 u opgeruimd.
+
+
+        **Rollen:** `guardian`, `staff`'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - file
+              - purpose
+              properties:
+                file:
+                  type: string
+                  format: binary
+                purpose:
+                  $ref: '#/components/schemas/FilePurpose'
+                campId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Opgeladen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/files/{fileId}:
+    get:
+      tags:
+      - Bestanden
+      summary: Metadata opvragen
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: fileId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags:
+      - Bestanden
+      summary: Bestand verwijderen
+      description: '**Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: fileId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Verwijderd
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/files/{fileId}/download-url:
+    get:
+      tags:
+      - Bestanden
+      summary: Tijdelijke downloadlink
+      description: 'De link is enkele minuten geldig.
+
+
+        **Rollen:** `guardian`, `staff`'
+      parameters:
+      - name: fileId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: variant
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - original
+          - thumbnail
+          - medium
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/files/storage-usage:
+    get:
+      tags:
+      - Bestanden
+      summary: Opslagverbruik van de organisatie
+      description: '**Rollen:** `organisation_admin`'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalBytes:
+                    type: integer
+                    format: int64
+                  fileCount:
+                    type: integer
+                    format: int32
+                  limitBytes:
+                    type: integer
+                    format: int64
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token van de Identity Service. De gateway valideert het token, de service controleert
+        tenant en rol.
+  responses:
+    ValidationError:
+      description: Validatiefout
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Geen of ongeldig access token
+    Forbidden:
+      description: Geen toegang (verkeerde rol of andere organisatie)
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Niet gevonden
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Conflict met de huidige toestand
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: Foutformaat volgens RFC 7807 (standaard in ASP.NET Core)
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Page:
+      type: object
+      required:
+      - page
+      - pageSize
+      - totalCount
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 1
+        pageSize:
+          type: integer
+          format: int32
+          example: 25
+        totalCount:
+          type: integer
+          format: int32
+          example: 3
+    FilePurpose:
+      type: string
+      enum:
+      - avatar
+      - message_attachment
+      - camp_photo
+      - data_export
+    File:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        purpose:
+          $ref: '#/components/schemas/FilePurpose'
+        status:
+          type: string
+          enum:
+          - uploaded
+          - scanning
+          - available
+          - rejected
+          - deleted
+        originalFileName:
+          type: string
+        contentType:
+          type: string
+          example: image/jpeg
+        sizeBytes:
+          type: integer
+          format: int64
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer
+          format: int32
+        uploadedByUserId:
+          type: string
+          format: uuid
+        uploadedAt:
+          type: string
+          format: date-time
