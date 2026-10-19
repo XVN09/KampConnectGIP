@@ -1,5 +1,6 @@
 using KampConnect.Shared.Contracts.Authorization;
 using KampConnect.Shared.ServiceDefaults.Authentication;
+using KampConnect.Shared.ServiceDefaults.Cors;
 using KampConnect.Shared.ServiceDefaults.Messaging;
 using KampConnect.Tenant.Data.Context.Implentation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -29,9 +30,12 @@ builder.Services.AddKampConnectAuthorization();
 
 builder.AddKampConnectMessaging(typeof(Program).Assembly);
 
+builder.Services.AddKampConnectCors(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseCors(CorsExtension.CorsPolicy);
 
 app.UseHttpsRedirection();
 

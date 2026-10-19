@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
 import type { Tenant } from "../api/types";
 import { getMyTenants } from "../api/identityApi";
+import { getActiveTenantId } from "../auth/tenant";
 
 const TenantsPage = () => {
     const auth = useAuth();
@@ -11,6 +12,7 @@ const TenantsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const accessToken = auth.user?.access_token;
+    const activeTenantId = getActiveTenantId(auth.user);
 
     useEffect(() => {
         // Guard clause: zonder token valt er niets op te halen.
@@ -44,7 +46,11 @@ const TenantsPage = () => {
             <h1>Mijn organisaties</h1>
             <ul>
                 {tenants.map(t => (
-                    <li key={t.tenantId}>{t.tenantName}</li>
+                    <li key={t.tenantId}>
+                        {t.tenantId === activeTenantId 
+                            ? <strong> {t.tenantName} Actief </strong> 
+                            : <button onClick={() => auth.signinRedirect({extraQueryParams: {tenant_id: t.tenantId }})}>{t.tenantName}</button>}
+                    </li>
                 ))}
             </ul>
         </>

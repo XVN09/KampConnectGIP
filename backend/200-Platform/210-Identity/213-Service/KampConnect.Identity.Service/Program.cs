@@ -27,6 +27,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 using KampConnect.Shared.ServiceDefaults.Messaging;
 using KampConnect.Identity.Service.Consumers;
 using KampConnect.Shared.ServiceDefaults.Authentication;
+using KampConnect.Shared.ServiceDefaults.Cors;
 
 var builder = WebApplication.CreateBuilder(args);
 var isDevelopment = builder.Environment.IsDevelopment();
@@ -193,15 +194,7 @@ builder.Services.AddOpenIddict()
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins(builder.Configuration.GetSection("AllowedCorsOrigins").Get<string[]>() ?? [])
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+builder.Services.AddKampConnectCors(builder.Configuration);
 
 // =====================================================================================
 //  Pipeline — de volgorde is belangrijk!
@@ -214,7 +207,7 @@ if (!isDevelopment)
     app.UseHsts();
 }
 
-app.UseCors();
+app.UseCors(CorsExtension.CorsPolicy);
 app.UseHttpsRedirection();
 app.UseStaticFiles();      // wwwroot (logo van de loginpagina)
 app.UseRouting();

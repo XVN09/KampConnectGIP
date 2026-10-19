@@ -1,7 +1,10 @@
 import { useAuth } from "react-oidc-context";
+import { getActiveTenantId } from "../auth/tenant";
+import { useNavigate } from "react-router";
 
 const HomePage = () => {
     const auth = useAuth();
+    const navigate = useNavigate();
 
     return (
         <>
@@ -13,8 +16,11 @@ const HomePage = () => {
                 <button onClick={() => auth.signinRedirect()}>Sign In</button>
             )}
             {auth.isAuthenticated && (
-                <button onClick={() => auth.signoutRedirect()}>Sign Out</button>
+                <button onClick={() => auth.removeUser()}>Sign Out</button>
             )}
+
+            <h1>Actieve Organisatie</h1> <button onClick={() => navigate("/tenants")}>Wijzig Organisatie</button>
+            <p>{getActiveTenantId(auth.user) ?? "Geen actieve organisatie"}</p>
         </>
     );
 }

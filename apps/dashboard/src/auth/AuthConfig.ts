@@ -5,8 +5,8 @@ export const authConfig: AuthProviderProps = {
     client_id: import.meta.env.VITE_OIDC_CLIENT_ID,
     redirect_uri: import.meta.env.VITE_OIDC_REDIRECT_URI,
     response_type: "code",
-    scope: "openid email",
+    scope: "openid email roles",
     onSigninCallback: () => {
-        window.history.replaceState(null, "", window.location.origin);
+        window.history.replaceState(null, "", window.location.pathname);
     }
 };

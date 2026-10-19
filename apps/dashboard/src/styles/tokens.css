@@ -1,0 +1,50 @@
+/* KampConnect / Color */
+:root {
+    /*Fonts */
+    --font-heading: 'Bricolage Grotesque', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+
+    /* Light */
+    /* color */
+    --bg: #f6f8f5;
+    --bg-2: #eef1ec;
+    --ink: #1b231f;
+    --ink-2: #525c56;
+    --ink-3: #828d87;
+    --line: #e5ebe2;
+    --line-2: #d6dcd4;
+    --surface: #ffffff;
+    --surface-2: #f9faf7;
+    --accent-amber: #d9a039;
+    --accent-amber-soft: #f1e2c4;
+    --accent-coral: #f47565;
+    --accent-coral-600: #dc5140;
+    --accent-coral-soft: #fde2db;
+    --accent-rose: #de5969;
+    --accent-rose-700: #b32f40;
+    --accent-rose-soft: #f6dadd;
+    --accent-sky: #5fa8d8;
+    --accent-sky-soft: #dbe9f3;
+    --brand-100: #d7ebe0;
+    --brand-200: #b3d8c4;
+    --brand-300: #88c2a4;
+    --brand-400: #5fa985;
+    --brand-50: #eef6f1;
+    --brand-500: #409070;
+    --brand-600: #2f7a5c;
+    --brand-700: #27634b;
+    --brand-800: #234f3e;
+    --brand-900: #1d4032;
+}
+
+/* KampConnect / Radius */
+:root {
+  /* Default */
+  /* number */
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.375rem;
+  --radius-xl: 1.75rem;
+  --radius-full: 62.4375rem;
+}
