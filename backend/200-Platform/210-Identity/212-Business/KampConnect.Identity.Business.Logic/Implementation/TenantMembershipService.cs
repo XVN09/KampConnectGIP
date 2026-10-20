@@ -54,6 +54,13 @@ public class TenantMembershipService(
             role_id = OwnerRoleId.role_id,
             creation_timestamp = now
         };
+
+        if (await userRoleRepository.RoleExistsAsync(userId, OwnerRoleId.role_id, tenantId, ct))
+        {
+            logger.LogInformation("User {UserId} already has role {RoleCode} for tenant {TenantId}", userId, OwnerRoleCode, tenantId);
+            return MembershipResult.Success();
+        }
+
         userRoleRepository.Add(userRole);
 
         await userRepository.SaveChangesAsync(ct);

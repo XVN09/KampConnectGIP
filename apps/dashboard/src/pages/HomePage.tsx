@@ -1,13 +1,20 @@
 import { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
-import { redirect } from "react-router";
+import { redirect, useNavigate } from "react-router";
 
 const HomePage = () => {
     const auth = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (auth.isAuthenticated) {
-            redirect("/dashboard");
+            if ( auth.user?.profile?.tenant_id != null) {
+                navigate("/dashboard");
+            } else {
+                navigate("/choose-tenant");
+            }
+        } else {
+            navigate("/signin-oidc");
         }
     }, [auth.isAuthenticated]);
 
@@ -15,7 +22,11 @@ const HomePage = () => {
         <>
             {auth.isLoading && <p>Loading...</p>}
             {auth.error && <p>Error: {auth.error.message}</p>}
-            {!auth.isAuthenticated &&  <button onClick={() => redirect("/signin-oidc")}>Sign In</button>}
+            {auth.isAuthenticated ? (
+                navigate("/dashboard")
+            ) : (
+                auth.signinRedirect()
+            )}
         </>
     );
 }

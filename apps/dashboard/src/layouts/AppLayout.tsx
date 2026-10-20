@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router';
+import TenantSwitcher from '../components/tenantSwitcher';
 import './AppLayout.css';
 
 const AppLayout = () => {
@@ -6,6 +7,7 @@ const AppLayout = () => {
         <div className="app">
             <aside className="sidebar">
                 <img src="/LogoWide.png" alt="KampConnect" />
+                <TenantSwitcher />
                 <nav>
                     <ul>
                         <li>Dashboard</li>

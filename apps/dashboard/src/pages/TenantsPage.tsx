@@ -1,38 +1,14 @@
-import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
-import type { Tenant } from "../api/types";
-import { getMyTenants } from "../api/identityApi";
+import { useMyTenants } from "../hooks/useMyTenants";
 import { getActiveTenantId } from "../auth/tenant";
 
 const TenantsPage = () => {
     const auth = useAuth();
 
     // Alle hooks staan bovenaan, vóór elke return: React herkent ze aan hun volgorde.
-    const [tenants, setTenants] = useState<Tenant[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const accessToken = auth.user?.access_token;
     const activeTenantId = getActiveTenantId(auth.user);
-
-    useEffect(() => {
-        // Guard clause: zonder token valt er niets op te halen.
-        if (!accessToken) return;
-
-        const fetchTenants = async () => {
-            try {
-                const result = await getMyTenants(accessToken);
-                console.log("Tenants fetched:", result);
-                setTenants(result);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "Failed to fetch tenants");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTenants();
-        // Enkel accessToken: tenants hoort hier niet bij, want dit effect schrijft die zelf (anders: oneindige lus).
-    }, [accessToken]);
+    const { tenants, loading, error } = useMyTenants(accessToken);
 
     // Vroege returns: pas ná alle hooks.
     if (auth.isLoading) return <p>Laden…</p>;

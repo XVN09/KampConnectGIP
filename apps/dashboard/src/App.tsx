@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router";
+import ChooseTenantPage from "./pages/ChooseTenantPage";
 import { authConfig } from "./auth/AuthConfig";
 import AppLayout from "./layouts/AppLayout";
 import HomePage from "./pages/HomePage";
@@ -17,6 +18,7 @@ const App = () => {
                         <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/tenants" element={<TenantsPage />} />
                     </Route>
+                    <Route path="/choose-tenant" element={<ChooseTenantPage />} />
                     <Route path="/" element={<HomePage />} />
                     <Route path="/signin-oidc" element={<SignInCallback />} />
                     <Route path="*" element={<NotFoundPage />} />
