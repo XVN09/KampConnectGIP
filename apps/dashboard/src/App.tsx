@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { authConfig } from "./auth/AuthConfig";
 import AppLayout from "./layouts/AppLayout";
 import HomePage from "./pages/HomePage";
+import DashboardPage from "./pages/DashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { AuthProvider } from "react-oidc-context";
 import TenantsPage from "./pages/TenantsPage";
@@ -13,9 +14,10 @@ const App = () => {
             <BrowserRouter>
                 <Routes>
                     <Route element={<AppLayout />}>
-                        <Route path="/" element={<HomePage />} />
+                        <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/tenants" element={<TenantsPage />} />
                     </Route>
+                    <Route path="/" element={<HomePage />} />
                     <Route path="/signin-oidc" element={<SignInCallback />} />
                     <Route path="*" element={<NotFoundPage />} />
                  </Routes>

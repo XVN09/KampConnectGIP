@@ -1,26 +1,21 @@
+import { useEffect } from "react";
 import { useAuth } from "react-oidc-context";
-import { getActiveTenantId } from "../auth/tenant";
-import { useNavigate } from "react-router";
+import { redirect } from "react-router";
 
 const HomePage = () => {
     const auth = useAuth();
-    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (auth.isAuthenticated) {
+            redirect("/dashboard");
+        }
+    }, [auth.isAuthenticated]);
 
     return (
         <>
             {auth.isLoading && <p>Loading...</p>}
             {auth.error && <p>Error: {auth.error.message}</p>}
-            {auth.isAuthenticated ? (
-                <p>Welcome, {auth.user?.profile.email}</p>
-            ) : (
-                <button onClick={() => auth.signinRedirect()}>Sign In</button>
-            )}
-            {auth.isAuthenticated && (
-                <button onClick={() => auth.removeUser()}>Sign Out</button>
-            )}
-
-            <h1>Actieve Organisatie</h1> <button onClick={() => navigate("/tenants")}>Wijzig Organisatie</button>
-            <p>{getActiveTenantId(auth.user) ?? "Geen actieve organisatie"}</p>
+            {!auth.isAuthenticated &&  <button onClick={() => redirect("/signin-oidc")}>Sign In</button>}
         </>
     );
 }
