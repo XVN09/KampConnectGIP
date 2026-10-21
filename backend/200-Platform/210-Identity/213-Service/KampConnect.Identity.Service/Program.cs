@@ -131,6 +131,7 @@ builder.Services.AddOpenIddict()
         options.SetAuthorizationEndpointUris("oauth2/authorize")
                .SetTokenEndpointUris("oauth2/token")
                .SetRevocationEndpointUris("oauth2/revoke")
+               .SetEndSessionEndpointUris("oauth2/end-session")
                .SetUserInfoEndpointUris("oauth2/userinfo")
                .SetJsonWebKeySetEndpointUris(".well-known/jwks.json");
 
@@ -177,7 +178,8 @@ builder.Services.AddOpenIddict()
         var aspNetCore = options.UseAspNetCore()
             .EnableAuthorizationEndpointPassthrough()
             .EnableTokenEndpointPassthrough()
-            .EnableUserInfoEndpointPassthrough();
+            .EnableUserInfoEndpointPassthrough()
+            .EnableEndSessionEndpointPassthrough();
 
         if (isDevelopment)
         {

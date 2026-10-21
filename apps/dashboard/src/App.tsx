@@ -8,6 +8,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { AuthProvider } from "react-oidc-context";
 import TenantsPage from "./pages/TenantsPage";
 import SignInCallback from "./pages/SignInCallback";
+import SignOutCallBack from "./pages/SignOutCallBack";
 
 const App = () => {
     return (
@@ -21,6 +22,7 @@ const App = () => {
                     <Route path="/choose-tenant" element={<ChooseTenantPage />} />
                     <Route path="/" element={<HomePage />} />
                     <Route path="/signin-oidc" element={<SignInCallback />} />
+                    <Route path="/signout-callback-oidc" element={<SignOutCallBack />} />
                     <Route path="*" element={<NotFoundPage />} />
                  </Routes>
            </BrowserRouter>

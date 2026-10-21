@@ -1,32 +1,28 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "react-oidc-context";
-import { redirect, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 const HomePage = () => {
-    const auth = useAuth();
+    const { isLoading, activeNavigator, error, isAuthenticated, user, signinRedirect } = useAuth();
     const navigate = useNavigate();
+    const tenantId = user?.profile?.tenant_id;
+    const hasRedirected = useRef(false);
 
     useEffect(() => {
-        if (auth.isAuthenticated) {
-            if ( auth.user?.profile?.tenant_id != null) {
-                navigate("/dashboard");
-            } else {
-                navigate("/choose-tenant");
-            }
-        } else {
-            navigate("/signin-oidc");
+        if (isLoading || activeNavigator || error) return;
+
+        if (isAuthenticated) {
+            navigate(tenantId != null ? "/dashboard" : "/choose-tenant", { replace: true });
+        } else if (!hasRedirected.current) {
+            hasRedirected.current = true;
+            void signinRedirect();
         }
-    }, [auth.isAuthenticated]);
+    }, [isLoading, activeNavigator, error, isAuthenticated, tenantId, signinRedirect, navigate]);
 
     return (
         <>
-            {auth.isLoading && <p>Loading...</p>}
-            {auth.error && <p>Error: {auth.error.message}</p>}
-            {auth.isAuthenticated ? (
-                navigate("/dashboard")
-            ) : (
-                auth.signinRedirect()
-            )}
+            {(isLoading || activeNavigator) && <p>Loading...</p>}
+            {error && <p>Error: {error.message}</p>}
         </>
     );
 }

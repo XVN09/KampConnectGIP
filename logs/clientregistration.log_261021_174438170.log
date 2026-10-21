@@ -1,0 +1,10 @@
+21/10/2026 17:44:38.155 - ClientRegistrationMainService - Information - 2 - ClientRegistrationMainService.RunAsync - Start registratie (Development)
+21/10/2026 17:44:39.675 - ClientRegistrationMainService - Information - 6 - ClientRegistrationMainService.RegisterClientsAsync - Client kampconnect-app bijgewerkt
+21/10/2026 17:44:39.689 - ClientRegistrationMainService - Information - 7 - ClientRegistrationMainService.RegisterClientsAsync - Client kampconnect-dashboard bijgewerkt
+21/10/2026 17:44:39.697 - ClientRegistrationMainService - Information - 4 - ClientRegistrationMainService.RegisterClientsAsync - Client kampconnect-postman bijgewerkt
+21/10/2026 17:44:39.732 - ClientRegistrationMainService - Information - 4 - ClientRegistrationMainService.RegisterRolesAsync - Rol guardian bijgewerkt
+21/10/2026 17:44:39.734 - ClientRegistrationMainService - Information - 8 - ClientRegistrationMainService.RegisterRolesAsync - Rol organisation_admin bijgewerkt
+21/10/2026 17:44:39.736 - ClientRegistrationMainService - Information - 4 - ClientRegistrationMainService.RegisterRolesAsync - Rol platform_admin bijgewerkt
+21/10/2026 17:44:39.737 - ClientRegistrationMainService - Information - 4 - ClientRegistrationMainService.RegisterRolesAsync - Rol staff bijgewerkt
+21/10/2026 17:44:39.972 - ClientRegistrationMainService - Information - 4 - ClientRegistrationMainService.RegisterTestUserAsync - Testgebruiker xander@kampconnect.local bestaat al (wachtwoord bijgewerkt)
+21/10/2026 17:44:40.007 - ClientRegistrationMainService - Information - 4 - ClientRegistrationMainService.RunAsync - Registratie voltooid

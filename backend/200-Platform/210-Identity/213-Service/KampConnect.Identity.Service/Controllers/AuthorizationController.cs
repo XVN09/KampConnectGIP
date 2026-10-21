@@ -154,6 +154,22 @@ public class AuthorizationController(
 
     #endregion
 
+    #region /oauth2/end-session
+
+    /// <summary>
+    /// Beëindigt de Identity-browsersessie en laat OpenIddict de OIDC-logoutrespons afhandelen.
+    /// OpenIddict valideert zelf de client en de eventuele post-logout-redirect-URI.
+    /// </summary>
+    [HttpGet("~/oauth2/end-session")]
+    public async Task<IActionResult> EndSession()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        return SignOut(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+
+    #endregion
+
     #region /oauth2/userinfo
 
     /// <summary>

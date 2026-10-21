@@ -7,7 +7,7 @@
 }
 .sidebar {
     display: flex;
-    width: 280px;
+    width: 200px;
     padding: 22px 20px;
     flex-direction: column;
     align-items: flex-start;
@@ -19,6 +19,39 @@
     background: var(--surface);
 }
 
+.sidebar nav {
+    width: 100%;
+}
+
+.sidebar nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar nav a {
+    display: flex;
+    text-decoration: none;
+    padding: 10px 12px;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--ink-2);
+    border-radius: var(--radius-sm);   
+}
+
+.sidebar nav a:hover {
+    background: var(--brand-50);
+    color: var(--brand-600);
+}
+
+
+.sidebar nav a.active {
+    background: var(--brand-50);
+    font-weight: bold;
+    color: var(--brand-700);
+}
+
 .sidebar img {
     height: 50px;
     width: auto;
@@ -28,6 +61,41 @@
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+.signout-button {
+    display: flex;
+    padding: 10px 12px;
+    margin-top: auto;
+    border: none;
+    align-items: center;
+    gap: 10px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--ink-2);
+    cursor: pointer;
+    font: inherit;
+}
+
+.signout-button:hover {
+    background: var(--brand-600);
+    color: var(--brand-50);
+}
+
+.tenant-switcher {
+    width: 100%;
+}
+
+.tenant-switcher select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    font: inherit;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
 }
 
 .main-area {

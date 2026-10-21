@@ -139,6 +139,7 @@ internal class ClientRegistrationMainService(
         // Endpoints
         descriptor.Permissions.Add(Permissions.Endpoints.Token);
         descriptor.Permissions.Add(Permissions.Endpoints.Revocation);
+        descriptor.Permissions.Add(Permissions.Endpoints.EndSession);
 
         // Grant types
         foreach (var grantType in client.GrantTypes)

@@ -133,7 +133,7 @@ paths:
   /oauth2/revoke:
     post:
       tags: [OAuth]
-      summary: Uitloggen (refresh token intrekken)
+      summary: Refresh- of access token intrekken
       security: []
       requestBody:
         required: true
@@ -148,6 +148,27 @@ paths:
       responses:
         '200':
           description: Ingetrokken (ook als het token al ongeldig was)
+
+  /oauth2/end-session:
+    get:
+      tags: [OAuth]
+      summary: OIDC-browsersessie beëindigen
+      description: |
+        Beëindigt de login-cookie van de gebruiker bij Identity. OpenIddict valideert
+        `id_token_hint` en de eventuele `post_logout_redirect_uri` tegen de clientregistratie.
+        Dit endpoint trekt niet automatisch refresh- of access tokens in; gebruik daarvoor
+        `/oauth2/revoke`.
+      security: []
+      parameters:
+        - { name: client_id, in: query, required: false, schema: { type: string } }
+        - { name: id_token_hint, in: query, required: false, schema: { type: string } }
+        - { name: post_logout_redirect_uri, in: query, required: false, schema: { type: string } }
+        - { name: state, in: query, required: false, schema: { type: string } }
+      responses:
+        '302':
+          description: Logout afgehandeld; redirect wanneer een geldige terugkeer-URI is opgegeven
+        '400':
+          description: Ongeldige logoutaanvraag of niet-geregistreerde terugkeer-URI
 
   /oauth2/userinfo:
     get:
@@ -274,6 +295,8 @@ components:
         issuer: { type: string, example: 'https://auth.kampconnect.be' }
         authorization_endpoint: { type: string, example: 'https://auth.kampconnect.be/oauth2/authorize' }
         token_endpoint: { type: string, example: 'https://auth.kampconnect.be/oauth2/token' }
+        end_session_endpoint: { type: string, example: 'https://auth.kampconnect.be/oauth2/end-session' }
+        revocation_endpoint: { type: string, example: 'https://auth.kampconnect.be/oauth2/revoke' }
         userinfo_endpoint: { type: string, example: 'https://auth.kampconnect.be/oauth2/userinfo' }
         jwks_uri: { type: string, example: 'https://auth.kampconnect.be/.well-known/jwks.json' }
         grant_types_supported:

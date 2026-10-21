@@ -8,19 +8,18 @@ const TenantSwitcher = () => {
     const activeTenantId = auth.user?.profile?.tenant_id;
 
     return (
-        <div>
+        <div className="tenant-switcher">
             {loading && <p>Loading tenants…</p>}
             {error && <p>Error: {error}</p>}
             {tenants.length === 0 && !loading && <p>Geen organisaties gevonden.</p>}
-            <ul>
+
+            <select aria-label="Selecteer organisatie">
                 {tenants.map(t => (
-                    <select key={t.tenantId}>
-                        <option value={t.tenantId} selected={t.tenantId === activeTenantId}>
-                            {t.tenantName} {t.tenantId === activeTenantId ? "(Actief)" : ""}
-                        </option>
-                    </select>
+                    <option value={t.tenantId} selected={t.tenantId === activeTenantId} key={t.tenantId}>
+                        {t.tenantName} 
+                    </option>
                 ))}
-            </ul>
+            </select>
         </div>
     );
 };
