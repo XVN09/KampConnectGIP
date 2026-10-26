@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Identity.Data.Context.Implentation;
 using KampConnect.Identity.Data.Entity.Users;
 using KampConnect.Identity.Data.Interface.Repository;
@@ -17,7 +18,7 @@ public class UserTokenRepository(KampConnectIdentityDbContext dbContext) : IUser
                 t.consumed_timestamp == null &&          // nog niet gebruikt
                 t.expiration_timestamp > utcNow, ct);    // nog niet verlopen
 
-    public Task<List<UserToken>> GetUsableForUserAsync(int userId, string purpose, DateTime utcNow, CancellationToken ct = default) =>
+    public Task<List<UserToken>> GetUsableForUserAsync(Guid userId, string purpose, DateTime utcNow, CancellationToken ct = default) =>
         dbContext.UserTokens
             .Where(t =>
                 t.user_id == userId &&

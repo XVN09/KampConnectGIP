@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Tenant.Business.Contracts.ClassTypes;
 using KampConnect.Tenant.Business.Contracts.Requests;
 
@@ -9,5 +10,5 @@ public interface ITenantService
     public Task<TenantResult>GetCurrentAsync(int tenantId, CancellationToken ct = default);
 
     // Maak een nieuwe tenant aan 
-    public Task<TenantResult> CreateAsync(TenantCreate request, int userId, CancellationToken ct = default);
+    public Task<TenantResult> CreateAsync(TenantCreate request, Guid userId, CancellationToken ct = default);
 }

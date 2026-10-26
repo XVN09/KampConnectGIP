@@ -2,7 +2,7 @@ import { NavLink, Outlet } from 'react-router';
 import { useAuth } from 'react-oidc-context';
 import TenantSwitcher from '../components/tenantSwitcher';
 import './AppLayout.css';
-import { LayoutDashboard, LogOut, MessageCircle, Settings } from 'lucide-react';
+import { LayoutDashboard, LogOut, MessageCircle, Settings, Tent } from 'lucide-react';
 
 const AppLayout = () => {
     const auth = useAuth();
@@ -15,6 +15,7 @@ const AppLayout = () => {
                 <nav>
                     <ul>
                         <li><NavLink to="/dashboard"><LayoutDashboard size={16} aria-hidden="true" />Dashboard</NavLink></li>
+                        <li><NavLink to="/camps"><Tent size={16} aria-hidden="true" />Kampen</NavLink></li>
                         <li><NavLink to="/chat"><MessageCircle size={16} aria-hidden="true" />Chat</NavLink></li>
                         <li><NavLink to="/instellingen"><Settings size={16} aria-hidden="true" />Instellingen</NavLink></li>
                     </ul>

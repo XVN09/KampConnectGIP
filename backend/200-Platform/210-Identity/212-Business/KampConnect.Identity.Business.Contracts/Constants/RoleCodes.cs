@@ -10,5 +10,5 @@ public static class RoleCodes
     public const string OrganisationAdmin = "organisation_admin";
     public const string PlatformAdmin = "platform_admin";
     public const string Staff = "staff";
-
+    public const string Participant = "participant";
 }

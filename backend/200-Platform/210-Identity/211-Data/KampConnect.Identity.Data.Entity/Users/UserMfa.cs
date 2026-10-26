@@ -12,7 +12,7 @@ public class UserMfa
     [Key]
     public int user_mfa_id { get; set; }
 
-    public required int user_id { get; set; }
+    public required Guid user_id { get; set; }
 
     [MaxLength(30)]
     public required string mfa_type { get; set; }

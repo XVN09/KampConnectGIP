@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Tenant.Business.Contracts.ClassTypes;
 using KampConnect.Tenant.Business.Contracts.Interfaces;
 using KampConnect.Tenant.Business.Contracts.Requests;
@@ -28,7 +29,7 @@ public class TenantService(ITenantRepository tenantRepository, ILogger<TenantSer
     #endregion
 
     #region CreateAsync
-    public async Task<TenantResult> CreateAsync(TenantCreate request, int userId, CancellationToken ct = default)
+    public async Task<TenantResult> CreateAsync(TenantCreate request, Guid userId, CancellationToken ct = default)
     {
         // Zet validator op met slug en naam regels
         var validator = new TenantValidator()

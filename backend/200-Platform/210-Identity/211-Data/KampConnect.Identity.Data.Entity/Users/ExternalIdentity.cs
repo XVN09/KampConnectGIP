@@ -13,7 +13,7 @@ public class ExternalIdentity
     [Key]
     public int external_identity_id { get; set; }
 
-    public required int user_id { get; set; }
+    public required Guid user_id { get; set; }
 
     [MaxLength(255)]
     public required string issuer { get; set; }

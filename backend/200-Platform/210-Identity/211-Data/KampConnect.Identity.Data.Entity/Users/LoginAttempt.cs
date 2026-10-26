@@ -12,7 +12,7 @@ public class LoginAttempt
     [Key]
     public int login_attempt_id { get; set; }
 
-    public int? user_id { get; set; }
+    public Guid? user_id { get; set; }
 
     [MaxLength(100)]
     public string? attempted_username { get; set; }

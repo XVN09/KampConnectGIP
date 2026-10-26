@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Identity.Data.Context.Implentation;
 using KampConnect.Identity.Data.Entity.Users;
 using KampConnect.Identity.Data.Interface.Repository;
@@ -11,13 +12,13 @@ namespace KampConnect.Identity.Data.Repository.Implementation;
 /// </summary>
 public class UserRepository(KampConnectIdentityDbContext dbContext) : IUserRepository
 {
-    public Task<User?> GetByIdAsync(int userId, CancellationToken ct = default) =>
+    public Task<User?> GetByIdAsync(Guid userId, CancellationToken ct = default) =>
         dbContext.Users.FirstOrDefaultAsync(u => u.user_id == userId, ct);
 
     public Task<User?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken ct = default) =>
         dbContext.Users.FirstOrDefaultAsync(u => u.email_normalized == normalizedEmail, ct);
 
-    public Task<User?> GetByIdWithRolesAsync(int userId, CancellationToken ct = default) =>
+    public Task<User?> GetByIdWithRolesAsync(Guid userId, CancellationToken ct = default) =>
         dbContext.Users
             .AsNoTracking()                       // enkel lezen → sneller, geen change tracking
             .Include(u => u.UserRoles)            // koppelingen gebruiker ↔ rol (met tenant_id)

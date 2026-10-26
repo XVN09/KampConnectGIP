@@ -8,7 +8,7 @@ public record TenantCreated
 {
     public int TenantId { get; init; }
 
-    public int CreatedByUserId { get; init; }
+    public Guid CreatedByUserId { get; init; }
 
     public string TenantName { get; init; } = string.Empty;
 

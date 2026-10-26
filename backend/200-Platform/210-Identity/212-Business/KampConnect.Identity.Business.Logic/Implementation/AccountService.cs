@@ -69,7 +69,7 @@ public class AccountService(
         var (token, hash) = SecureToken.Create();
         user.UserTokens.Add(new UserToken
         {
-            user_id = 0, // wordt door EF ingevuld via de relatie
+            user_id = Guid.Empty, // wordt door EF ingevuld via de relatie
             token_hash = hash,
             token_purpose = UserTokenPurposes.EmailVerification,
             expiration_timestamp = now.AddHours(_settings.EmailVerificationLifetimeHours),

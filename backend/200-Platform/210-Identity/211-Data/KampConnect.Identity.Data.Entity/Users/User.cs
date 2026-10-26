@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using KampConnect.Identity.Data.Entity.Claims;
 using KampConnect.Identity.Data.Entity.Roles;
 using KampConnect.Shared.Logging.Config.Tools;
@@ -13,7 +14,7 @@ public class User
 {
     #region Properties
     [Key]
-    public int user_id { get; set; }
+    public Guid user_id { get; set; }
 
     [MaxLength(100)]
     public string? username { get; set; }

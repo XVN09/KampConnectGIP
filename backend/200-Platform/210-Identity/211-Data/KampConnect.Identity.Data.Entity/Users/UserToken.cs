@@ -12,7 +12,7 @@ public class UserToken
     [Key]
     public int user_token_id { get; set; }
 
-    public required int user_id { get; set; }
+    public required Guid user_id { get; set; }
 
     [MaxLength(450)]
     public required string token_hash { get; set; }

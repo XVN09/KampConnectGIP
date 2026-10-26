@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using KampConnect.Identity.Business.Contracts.ClassTypes;
 using KampConnect.Identity.Business.Contracts.Constants;
@@ -68,7 +69,7 @@ public class AuthorizationController(
         }
 
         // Ja → user_id uit de cookie halen
-        if (!int.TryParse(cookie.Principal.FindFirst(KampConnectClaimTypes.Subject)?.Value, out var userId))
+        if (!Guid.TryParse(cookie.Principal.FindFirst(KampConnectClaimTypes.Subject)?.Value, out var userId))
         {
             // Kapotte of oude cookie: uitloggen en opnieuw laten inloggen
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -127,7 +128,7 @@ public class AuthorizationController(
 
         // De principal die bij de code / het refresh token hoort (door OpenIddict uitgelezen)
         var stored = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
-        if (stored is null || !int.TryParse(stored.GetClaim(Claims.Subject), out var userId))
+        if (stored is null || !Guid.TryParse(stored.GetClaim(Claims.Subject), out var userId))
         {
             return ForbidWithError(Errors.InvalidGrant, "Het token is niet meer geldig.");
         }

@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Identity.Business.Contracts.ClassTypes;
 
 namespace KampConnect.Identity.Business.Contracts.Interfaces;
@@ -13,5 +14,5 @@ public interface IUserClaimsService
     /// Voor welke organisatie het token moet gelden. Null = automatisch kiezen als de gebruiker
     /// maar bij één organisatie hoort.
     /// </param>
-    Task<UserIdentityResult> BuildIdentityAsync(int userId, int? requestedTenantId, CancellationToken ct = default);
+    Task<UserIdentityResult> BuildIdentityAsync(Guid userId, int? requestedTenantId, CancellationToken ct = default);
 }

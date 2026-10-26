@@ -18,7 +18,7 @@ public class TenantMembershipService(
     ITenantSnapshotRepository tenantSnapshotRepository,
     ILogger<TenantMembershipService> logger) : ITenantMembershipService
 {
-    public async Task<MembershipResult> AddOwnerAsync(int tenantId, int userId, CancellationToken ct = default)
+    public async Task<MembershipResult> AddOwnerAsync(int tenantId, Guid userId, CancellationToken ct = default)
     {
         // Owner rol id ophalen
         const string OwnerRoleCode = RoleCodes.OrganisationAdmin;
@@ -70,7 +70,7 @@ public class TenantMembershipService(
         return MembershipResult.Success();
     }
 
-    public async Task<TenantsResult> GetTenantsForUserAsync(int userId, CancellationToken ct = default)
+    public async Task<TenantsResult> GetTenantsForUserAsync(Guid userId, CancellationToken ct = default)
     {
         List<int> tenantIds = await userRoleRepository.GetTenantIdsByUserIdAsync(userId, ct);
 

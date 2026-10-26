@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using KampConnect.Identity.Data.Entity.Users;
@@ -18,7 +19,7 @@ public class UserRole
 
     public required int role_id { get; set; }
 
-    public required int user_id { get; set; }
+    public required Guid user_id { get; set; }
 
     public int? tenant_id { get; set; }
 

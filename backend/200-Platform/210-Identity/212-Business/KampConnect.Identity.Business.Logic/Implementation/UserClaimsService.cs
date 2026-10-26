@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using KampConnect.Identity.Business.Contracts.ClassTypes;
 using KampConnect.Identity.Business.Contracts.Constants;
@@ -19,7 +20,7 @@ namespace KampConnect.Identity.Business.Logic.Implementation;
 /// </summary>
 public class UserClaimsService(IUserRepository userRepository) : IUserClaimsService
 {
-    public async Task<UserIdentityResult> BuildIdentityAsync(int userId, int? requestedTenantId, CancellationToken ct = default)
+    public async Task<UserIdentityResult> BuildIdentityAsync(Guid userId, int? requestedTenantId, CancellationToken ct = default)
     {
         var user = await userRepository.GetByIdWithRolesAsync(userId, ct);
 

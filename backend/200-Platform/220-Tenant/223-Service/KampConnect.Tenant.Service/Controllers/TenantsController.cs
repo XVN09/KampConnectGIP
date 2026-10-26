@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Shared.Contracts.Authorization;
 using KampConnect.Tenant.Business.Contracts.ClassTypes;
 using KampConnect.Tenant.Business.Contracts.Interfaces;
@@ -38,7 +39,7 @@ public class TenantsController(ITenantService tenantService) : ControllerBase
     public async Task<IActionResult> CreateTenant(TenantCreate request, CancellationToken ct)
     {
 
-        if (!int.TryParse(User.FindFirst(KampConnectClaimTypes.Subject)?.Value, out int userId))
+        if (!Guid.TryParse(User.FindFirst(KampConnectClaimTypes.Subject)?.Value, out Guid userId))
         {
             return Unauthorized();
         }

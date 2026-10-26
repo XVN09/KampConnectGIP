@@ -19,10 +19,10 @@ public enum AccountError
 public record AccountResult(
     bool Succeeded,
     AccountError Error = AccountError.None,
-    int? UserId = null,
+    Guid? UserId = null,
     IDictionary<string, string[]>? ValidationErrors = null)
 {
-    public static AccountResult Ok(int? userId = null) => new(true, UserId: userId);
+    public static AccountResult Ok(Guid? userId = null) => new(true, UserId: userId);
     public static AccountResult Fail(AccountError error) => new(false, error);
     public static AccountResult Invalid(IDictionary<string, string[]> errors) => new(false, AccountError.Validation, ValidationErrors: errors);
 }

@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Identity.Business.Contracts.Interfaces;
 using KampConnect.Shared.Contracts.Authorization;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ public class TenantSnapshotController(ITenantMembershipService tenantMembershipS
     [HttpGet("tenants")]
     public async Task<IActionResult> GetMyTenants(CancellationToken ct)
     {
-        if (!int.TryParse(User.FindFirst(KampConnectClaimTypes.Subject)?.Value, out int userId))
+        if (!Guid.TryParse(User.FindFirst(KampConnectClaimTypes.Subject)?.Value, out Guid userId))
         {
             Console.WriteLine("User ID claim is missing or invalid for subject:" + User.FindFirst(KampConnectClaimTypes.Subject)?.Value);
             return Unauthorized();

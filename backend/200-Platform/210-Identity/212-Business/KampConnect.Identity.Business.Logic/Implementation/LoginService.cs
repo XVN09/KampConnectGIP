@@ -125,7 +125,7 @@ public class LoginService(
         return LoginResult.Fail(failure, lockedUntil);
     }
 
-    private static LoginAttempt NewAttempt(int? userId, string? email, string? ip, bool success, string? reason, DateTime now) => new()
+    private static LoginAttempt NewAttempt(Guid? userId, string? email, string? ip, bool success, string? reason, DateTime now) => new()
     {
         user_id = userId,
         attempted_username = Truncate(email?.Trim(), 100), // kolom is max. 100 tekens

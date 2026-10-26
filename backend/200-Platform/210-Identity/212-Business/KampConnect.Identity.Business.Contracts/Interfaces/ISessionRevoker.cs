@@ -1,3 +1,5 @@
+using System;
+
 namespace KampConnect.Identity.Business.Contracts.Interfaces;
 
 /// <summary>
@@ -10,5 +12,5 @@ namespace KampConnect.Identity.Business.Contracts.Interfaces;
 public interface ISessionRevoker
 {
     /// <returns>Aantal ingetrokken tokens/autorisaties.</returns>
-    Task<int> RevokeAllAsync(int userId, CancellationToken ct = default);
+    Task<int> RevokeAllAsync(Guid userId, CancellationToken ct = default);
 }

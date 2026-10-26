@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Identity.Data.Entity.Users;
 
 namespace KampConnect.Identity.Data.Interface.Repository;
@@ -14,7 +15,7 @@ public interface IUserRepository
     /// <summary>
     /// Haalt een gebruiker op via zijn id. <b>Tracked</b>: wijzigingen worden bewaard bij SaveChangesAsync.
     /// </summary>
-    Task<User?> GetByIdAsync(int userId, CancellationToken ct = default);
+    Task<User?> GetByIdAsync(Guid userId, CancellationToken ct = default);
 
     /// <summary>
     /// Haalt een gebruiker op via zijn genormaliseerd e-mailadres (HOOFDLETTERS, zonder spaties).
@@ -26,7 +27,7 @@ public interface IUserRepository
     /// Haalt een gebruiker op mét zijn rollen (UserRoles → Role). <b>Read-only</b> (AsNoTracking):
     /// wordt enkel gebruikt om de claims van het token op te bouwen.
     /// </summary>
-    Task<User?> GetByIdWithRolesAsync(int userId, CancellationToken ct = default);
+    Task<User?> GetByIdWithRolesAsync(Guid userId, CancellationToken ct = default);
 
     /// <summary>Bestaat er al een account met dit genormaliseerd e-mailadres?</summary>
     Task<bool> EmailExistsAsync(string normalizedEmail, CancellationToken ct = default);

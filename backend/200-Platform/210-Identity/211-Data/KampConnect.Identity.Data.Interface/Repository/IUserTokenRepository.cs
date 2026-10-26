@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Identity.Data.Entity.Users;
 
 namespace KampConnect.Identity.Data.Interface.Repository;
@@ -21,7 +22,7 @@ public interface IUserTokenRepository
     /// Alle nog bruikbare tokens van een gebruiker voor een bepaald doel. <b>Tracked.</b>
     /// Wordt gebruikt om oude tokens ongeldig te maken wanneer er een nieuw verstuurd wordt.
     /// </summary>
-    Task<List<UserToken>> GetUsableForUserAsync(int userId, string purpose, DateTime utcNow, CancellationToken ct = default);
+    Task<List<UserToken>> GetUsableForUserAsync(Guid userId, string purpose, DateTime utcNow, CancellationToken ct = default);
 
     /// <summary>Voegt een nieuw token toe (pas in de database na SaveChangesAsync van een repository).</summary>
     void Add(UserToken token);

@@ -1,3 +1,4 @@
+using System;
 using KampConnect.Identity.Business.Contracts.Interfaces;
 using OpenIddict.Abstractions;
 
@@ -17,7 +18,7 @@ public class OpenIddictSessionRevoker(
     IOpenIddictTokenManager tokenManager,
     ILogger<OpenIddictSessionRevoker> logger) : ISessionRevoker
 {
-    public async Task<int> RevokeAllAsync(int userId, CancellationToken ct = default)
+    public async Task<int> RevokeAllAsync(Guid userId, CancellationToken ct = default)
     {
         var subject = userId.ToString();
         var count = 0;
