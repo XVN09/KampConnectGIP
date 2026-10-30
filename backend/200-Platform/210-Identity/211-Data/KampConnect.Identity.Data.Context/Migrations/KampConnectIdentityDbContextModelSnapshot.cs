@@ -72,8 +72,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<DateTime?>("modification_timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_claim_id");
 
@@ -182,8 +182,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<int?>("tenant_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_role_id");
 
@@ -194,6 +194,78 @@ namespace KampConnect.Identity.Data.Context.Migrations
                         .HasFilter("[tenant_id] IS NOT NULL");
 
                     b.ToTable("sec_user_role", "roles");
+                });
+
+            modelBuilder.Entity("KampConnect.Identity.Data.Entity.Tenant.Invitations.TenantInvitation", b =>
+                {
+                    b.Property<int>("tenant_invitation_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("tenant_invitation_id"));
+
+                    b.Property<Guid?>("accepted_by_user_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("accepted_timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("cancelled_by_user_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("cancelled_timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("creation_timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("expiry_timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("modification_timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("role_id")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("sent_by_user_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("tenant_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("token_hash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("tenant_invitation_id");
+
+                    b.HasIndex("accepted_by_user_id");
+
+                    b.HasIndex("cancelled_by_user_id");
+
+                    b.HasIndex("role_id");
+
+                    b.HasIndex("sent_by_user_id");
+
+                    b.HasIndex("token_hash")
+                        .IsUnique();
+
+                    b.HasIndex("tenant_id", "email")
+                        .IsUnique()
+                        .HasFilter("[status] = 'Pending'");
+
+                    b.ToTable("tenant_invitation", "roles");
                 });
 
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Tenant.TenantSnapshot", b =>
@@ -263,8 +335,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<int?>("tenant_identity_provider_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("external_identity_id");
 
@@ -304,8 +376,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<bool>("is_successful")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("login_attempt_id");
 
@@ -316,11 +388,9 @@ namespace KampConnect.Identity.Data.Context.Migrations
 
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Users.User", b =>
                 {
-                    b.Property<int>("user_id")
+                    b.Property<Guid>("user_id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("user_id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("creation_timestamp")
                         .HasColumnType("datetime2");
@@ -401,8 +471,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_mfa_id");
 
@@ -438,8 +508,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_token_id");
 
@@ -725,6 +795,45 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KampConnect.Identity.Data.Entity.Tenant.Invitations.TenantInvitation", b =>
+                {
+                    b.HasOne("KampConnect.Identity.Data.Entity.Users.User", "AcceptedByUser")
+                        .WithMany()
+                        .HasForeignKey("accepted_by_user_id");
+
+                    b.HasOne("KampConnect.Identity.Data.Entity.Users.User", "CancelledByUser")
+                        .WithMany()
+                        .HasForeignKey("cancelled_by_user_id");
+
+                    b.HasOne("KampConnect.Identity.Data.Entity.Roles.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("role_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KampConnect.Identity.Data.Entity.Users.User", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("sent_by_user_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KampConnect.Identity.Data.Entity.Tenant.TenantSnapshot", "TenantSnapshot")
+                        .WithMany()
+                        .HasForeignKey("tenant_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AcceptedByUser");
+
+                    b.Navigation("CancelledByUser");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("SentByUser");
+
+                    b.Navigation("TenantSnapshot");
                 });
 
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Tenant.TenantSnapshot", b =>

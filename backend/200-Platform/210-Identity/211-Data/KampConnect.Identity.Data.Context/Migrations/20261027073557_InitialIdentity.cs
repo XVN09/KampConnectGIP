@@ -146,12 +146,33 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "sec_tenant_snapshot",
+                schema: "roles",
+                columns: table => new
+                {
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    tenant_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    tenant_slug = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    last_synced_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TenantSnapshottenant_id = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sec_tenant_snapshot", x => x.tenant_id);
+                    table.ForeignKey(
+                        name: "FK_sec_tenant_snapshot_sec_tenant_snapshot_TenantSnapshottenant_id",
+                        column: x => x.TenantSnapshottenant_id,
+                        principalSchema: "roles",
+                        principalTable: "sec_tenant_snapshot",
+                        principalColumn: "tenant_id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "sec_user",
                 schema: "users",
                 columns: table => new
                 {
-                    user_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     password_hash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     last_login = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -204,7 +225,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     external_identity_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     issuer = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     subject = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     provider_label = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
@@ -239,7 +260,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     login_attempt_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: true),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     attempted_username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ip_address = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
                     is_successful = table.Column<bool>(type: "bit", nullable: false),
@@ -264,7 +285,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     user_claim_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     claim_id = table.Column<int>(type: "int", nullable: false),
                     claim_value = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     creation_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -296,7 +317,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     user_mfa_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     mfa_type = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     secret_encrypted = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     is_confirmed = table.Column<bool>(type: "bit", nullable: false),
@@ -324,7 +345,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     user_role_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     role_id = table.Column<int>(type: "int", nullable: false),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     tenant_id = table.Column<int>(type: "int", nullable: true),
                     creation_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     modification_timestamp = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -355,7 +376,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     user_token_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     token_hash = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     token_purpose = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     expiration_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -368,6 +389,65 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     table.ForeignKey(
                         name: "FK_sec_user_token_sec_user_user_id",
                         column: x => x.user_id,
+                        principalSchema: "users",
+                        principalTable: "sec_user",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tenant_invitation",
+                schema: "roles",
+                columns: table => new
+                {
+                    tenant_invitation_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    role_id = table.Column<int>(type: "int", nullable: false),
+                    sent_by_user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    accepted_by_user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    cancelled_by_user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    status = table.Column<string>(type: "nvarchar(20)", nullable: false),
+                    token_hash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    creation_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    modification_timestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    accepted_timestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    cancelled_timestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    expiry_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tenant_invitation", x => x.tenant_invitation_id);
+                    table.ForeignKey(
+                        name: "FK_tenant_invitation_sec_role_role_id",
+                        column: x => x.role_id,
+                        principalSchema: "roles",
+                        principalTable: "sec_role",
+                        principalColumn: "role_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_tenant_invitation_sec_tenant_snapshot_tenant_id",
+                        column: x => x.tenant_id,
+                        principalSchema: "roles",
+                        principalTable: "sec_tenant_snapshot",
+                        principalColumn: "tenant_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_tenant_invitation_sec_user_accepted_by_user_id",
+                        column: x => x.accepted_by_user_id,
+                        principalSchema: "users",
+                        principalTable: "sec_user",
+                        principalColumn: "user_id");
+                    table.ForeignKey(
+                        name: "FK_tenant_invitation_sec_user_cancelled_by_user_id",
+                        column: x => x.cancelled_by_user_id,
+                        principalSchema: "users",
+                        principalTable: "sec_user",
+                        principalColumn: "user_id");
+                    table.ForeignKey(
+                        name: "FK_tenant_invitation_sec_user_sent_by_user_id",
+                        column: x => x.sent_by_user_id,
                         principalSchema: "users",
                         principalTable: "sec_user",
                         principalColumn: "user_id",
@@ -486,6 +566,19 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_sec_tenant_snapshot_tenant_id",
+                schema: "roles",
+                table: "sec_tenant_snapshot",
+                column: "tenant_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_sec_tenant_snapshot_TenantSnapshottenant_id",
+                schema: "roles",
+                table: "sec_tenant_snapshot",
+                column: "TenantSnapshottenant_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_sec_user_email_normalized",
                 schema: "users",
                 table: "sec_user",
@@ -537,6 +630,45 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 schema: "users",
                 table: "sec_user_token",
                 column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_invitation_accepted_by_user_id",
+                schema: "roles",
+                table: "tenant_invitation",
+                column: "accepted_by_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_invitation_cancelled_by_user_id",
+                schema: "roles",
+                table: "tenant_invitation",
+                column: "cancelled_by_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_invitation_role_id",
+                schema: "roles",
+                table: "tenant_invitation",
+                column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_invitation_sent_by_user_id",
+                schema: "roles",
+                table: "tenant_invitation",
+                column: "sent_by_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_invitation_tenant_id_email",
+                schema: "roles",
+                table: "tenant_invitation",
+                columns: new[] { "tenant_id", "email" },
+                unique: true,
+                filter: "[status] = 'Pending'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tenant_invitation_token_hash",
+                schema: "roles",
+                table: "tenant_invitation",
+                column: "token_hash",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -578,6 +710,10 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 schema: "users");
 
             migrationBuilder.DropTable(
+                name: "tenant_invitation",
+                schema: "roles");
+
+            migrationBuilder.DropTable(
                 name: "sec_tenant_identity_provider",
                 schema: "platform_security");
 
@@ -591,6 +727,10 @@ namespace KampConnect.Identity.Data.Context.Migrations
 
             migrationBuilder.DropTable(
                 name: "sec_role",
+                schema: "roles");
+
+            migrationBuilder.DropTable(
+                name: "sec_tenant_snapshot",
                 schema: "roles");
 
             migrationBuilder.DropTable(

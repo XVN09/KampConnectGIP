@@ -21,6 +21,7 @@ public static class IdentityDataEx
         services.AddScoped<IUserTokenRepository, UserTokenRepository>();
         services.AddScoped<IUserRoleRepository, UserRoleRepository>();
         services.AddScoped<ITenantSnapshotRepository, TenantSnapshotRepository>();
+        services.AddScoped<ITenantInvitationRepository, TenantInvitationRepository>();
 
         return services;
     }

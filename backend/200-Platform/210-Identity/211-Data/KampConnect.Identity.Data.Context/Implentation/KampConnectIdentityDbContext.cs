@@ -6,6 +6,8 @@ using KampConnect.Identity.Data.Entity.Tenant;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.EntityFrameworkCore.Models;
+using KampConnect.Identity.Data.Entity.Tenant.Invitations;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace KampConnect.Identity.Data.Context.Implentation;
 
@@ -42,6 +44,7 @@ public class KampConnectIdentityDbContext(
 
     // Tenants Snapshot
     public DbSet<TenantSnapshot> TenantSnapshots { get; set; }
+    public DbSet<TenantInvitation> TenantInvitations { get; set; }
 
     #endregion
 
@@ -76,6 +79,9 @@ public class KampConnectIdentityDbContext(
         // Eén tenant snapshot per tenant
         builder.Entity<TenantSnapshot>().HasIndex(ts => ts.tenant_id).IsUnique();
 
+        // Eén uitnodiging per token_hash
+        builder.Entity<TenantInvitation>().HasIndex(ti => ti.token_hash).IsUnique();
+        builder.Entity<TenantInvitation>().HasIndex(ti => new { ti.tenant_id, ti.email }).IsUnique().HasFilter("[status] = 'Pending'");
     }
 
     #endregion

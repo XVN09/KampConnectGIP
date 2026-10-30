@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using KampConnect.Identity.Business.Contracts.Dto;
 
 namespace KampConnect.Identity.Business.Contracts.ClassTypes;
