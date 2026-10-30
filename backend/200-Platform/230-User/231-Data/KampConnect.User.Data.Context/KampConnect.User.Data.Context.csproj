@@ -2,4 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\KampConnect.User.Data.Entity\KampConnect.User.Data.Entity.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Implentation\" />
+  </ItemGroup>
 </Project>
