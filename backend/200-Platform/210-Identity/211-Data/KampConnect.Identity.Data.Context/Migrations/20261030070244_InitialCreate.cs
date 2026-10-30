@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KampConnect.Identity.Data.Context.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -146,12 +146,33 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "sec_tenant_snapshot",
+                schema: "roles",
+                columns: table => new
+                {
+                    tenant_id = table.Column<int>(type: "int", nullable: false),
+                    tenant_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    tenant_slug = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    last_synced_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TenantSnapshottenant_id = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sec_tenant_snapshot", x => x.tenant_id);
+                    table.ForeignKey(
+                        name: "FK_sec_tenant_snapshot_sec_tenant_snapshot_TenantSnapshottenant_id",
+                        column: x => x.TenantSnapshottenant_id,
+                        principalSchema: "roles",
+                        principalTable: "sec_tenant_snapshot",
+                        principalColumn: "tenant_id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "sec_user",
                 schema: "users",
                 columns: table => new
                 {
-                    user_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     password_hash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     last_login = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -204,7 +225,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     external_identity_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     issuer = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     subject = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     provider_label = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
@@ -239,7 +260,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     login_attempt_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: true),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     attempted_username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ip_address = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
                     is_successful = table.Column<bool>(type: "bit", nullable: false),
@@ -264,7 +285,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     user_claim_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     claim_id = table.Column<int>(type: "int", nullable: false),
                     claim_value = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     creation_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -296,7 +317,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     user_mfa_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     mfa_type = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     secret_encrypted = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     is_confirmed = table.Column<bool>(type: "bit", nullable: false),
@@ -324,7 +345,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     user_role_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     role_id = table.Column<int>(type: "int", nullable: false),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     tenant_id = table.Column<int>(type: "int", nullable: true),
                     creation_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     modification_timestamp = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -355,7 +376,7 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 {
                     user_token_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     token_hash = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     token_purpose = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     expiration_timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -486,6 +507,19 @@ namespace KampConnect.Identity.Data.Context.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_sec_tenant_snapshot_tenant_id",
+                schema: "roles",
+                table: "sec_tenant_snapshot",
+                column: "tenant_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_sec_tenant_snapshot_TenantSnapshottenant_id",
+                schema: "roles",
+                table: "sec_tenant_snapshot",
+                column: "TenantSnapshottenant_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_sec_user_email_normalized",
                 schema: "users",
                 table: "sec_user",
@@ -560,6 +594,10 @@ namespace KampConnect.Identity.Data.Context.Migrations
             migrationBuilder.DropTable(
                 name: "sec_oidc_token",
                 schema: "oidc");
+
+            migrationBuilder.DropTable(
+                name: "sec_tenant_snapshot",
+                schema: "roles");
 
             migrationBuilder.DropTable(
                 name: "sec_user_claim",

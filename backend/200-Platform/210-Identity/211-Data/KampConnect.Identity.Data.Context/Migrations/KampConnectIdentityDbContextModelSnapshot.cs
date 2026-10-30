@@ -72,8 +72,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<DateTime?>("modification_timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_claim_id");
 
@@ -182,8 +182,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<int?>("tenant_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_role_id");
 
@@ -263,8 +263,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<int?>("tenant_identity_provider_id")
                         .HasColumnType("int");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("external_identity_id");
 
@@ -304,8 +304,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                     b.Property<bool>("is_successful")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("login_attempt_id");
 
@@ -316,11 +316,9 @@ namespace KampConnect.Identity.Data.Context.Migrations
 
             modelBuilder.Entity("KampConnect.Identity.Data.Entity.Users.User", b =>
                 {
-                    b.Property<int>("user_id")
+                    b.Property<Guid>("user_id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("user_id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("creation_timestamp")
                         .HasColumnType("datetime2");
@@ -401,8 +399,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_mfa_id");
 
@@ -438,8 +436,8 @@ namespace KampConnect.Identity.Data.Context.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<int>("user_id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("user_id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("user_token_id");
 
